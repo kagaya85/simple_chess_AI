@@ -9,7 +9,7 @@ pawnEvalWhite = [
         [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
     ]
 
-pawnEvalBlack = pawnEvalWhite
+pawnEvalBlack = pawnEvalWhite.copy()
 pawnEvalBlack.reverse()
 
 knightEval = [
@@ -34,7 +34,7 @@ bishopEvalWhite = [
     [ -2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0]
 ]
 
-bishopEvalBlack = bishopEvalWhite
+bishopEvalBlack = bishopEvalWhite.copy()
 bishopEvalBlack.reverse()
 
 rookEvalWhite = [
@@ -45,10 +45,10 @@ rookEvalWhite = [
     [ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
     [ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
     [ -0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
-    [  0.0,   0.0, 0.0,  0.5,  0.5,  0.0,  0.0,  0.0]
+    [  0.0,  0.0,  0.0,  0.5,  0.5,  0.0,  0.0,  0.0]
 ]
 
-rookEvalBlack = rookEvalWhite
+rookEvalBlack = rookEvalWhite.copy()
 rookEvalBlack.reverse()
 
 queenEval = [
@@ -70,9 +70,9 @@ kingEvalWhite = [
     [ -3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
     [ -2.0, -3.0, -3.0, -4.0, -4.0, -3.0, -3.0, -2.0],
     [ -1.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -1.0],
-    [  2.0,  2.0,  0.0,  0.0,  0.0,  0.0,  2.0,  2.0 ],
-    [  2.0,  3.0,  1.0,  0.0,  0.0,  1.0,  3.0,  2.0 ]
+    [  2.0,  2.0,  0.0,  0.0,  0.0,  0.0,  2.0,  2.0],
+    [  2.0,  3.0,  1.0,  0.0,  0.0,  1.0,  3.0,  2.0]
 ]
 
-kingEvalBlack = kingEvalWhite
+kingEvalBlack = kingEvalWhite.copy()
 kingEvalBlack.reverse()
