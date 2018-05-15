@@ -2,8 +2,16 @@ import chess
 import sys
 import pieceValue as pv
 
-color = 'b'
-searchDepth = 3
+"""
+全局参数部分
+color: b 黑色（后手） w 白色（先手）
+searchDepth: 搜索深度
+需添加防止重复走子的代码
+"""
+
+color = 'w'
+searchDepth = 4
+
 
 def evaluateBoard(fenStr) -> float:
     """
@@ -76,24 +84,36 @@ def expand(depth, board, isMax, alpha, beta):
     if depth == 0:
         return evaluateBoard(board.fen())
     if isMax:
-        Value = -9999
-        for newMove in board.legal_moves:
+        value = -9999
+        for index, newMove in enumerate(board.legal_moves):
             board.push(newMove)
-            Value = max(Value, expand(depth - 1, board, not isMax, alpha, beta))
+            if(index == 0):
+                current = expand(depth - 1, board, not isMax, alpha, beta)
+            else:
+                value = max(value, expand(depth - 1, board, not isMax, alpha, alpha + 1))
+                if(value > alpha and value < beta):
+                    value = max(value, expand(depth - 1, board, not isMax, alpha, beta))
             board.pop()
-            alpha = max(alpha, Value)
+            current = max(current, value)
+            alpha = max(alpha, value)
             if (alpha >= beta):
-                return alpha
+                break
     else:
-        Value = 9999
-        for newMove in board.legal_moves:
+        value = 9999
+        for index, newMove in enumerate(board.legal_moves):
             board.push(newMove)
-            Value = min(Value, expand(depth - 1, board, not isMax, alpha, beta))
+            if(index == 0):
+                current = expand(depth - 1, board, not isMax, alpha, beta)
+            else:
+                value = min(value, expand(depth - 1, board, not isMax, beta - 1, beta))
+                if(value > alpha and value < beta):
+                    value = min(value, expand(depth - 1, board, not isMax, alpha, beta))
             board.pop()
-            beta = min(beta, Value)
+            current = min(current, value)
+            beta = min(beta, value)
             if (alpha >= beta):
-                return beta
-    return Value
+                break
+    return current
 
 
 def getBestMove(depth, board, isMax):
@@ -135,18 +155,29 @@ def is_white_turn(fenStr):
 
 if __name__ == '__main__':
     board = chess.Board()
-    
+
     while board.is_game_over() is False:
+        if(color == 'w'):
+            AIMove = getBestMove(searchDepth, board, True)
+            board.push(AIMove)
+            print("AI:")
+            print(board)
+
         while True:
-            playerInput = input("\n请输入起始结束位置（eg.a1b2 exit退出）：")
+            playerInput = input("\nplease input moves（eg.a1b2 exit退出）：")
             if playerInput == 'exit':
                 sys.exit('goodbye^_^\n')
             playerMove = chess.Move.from_uci(playerInput)
             if playerMove in board.legal_moves:
                 break
+            else:
+                print("input illegal")
         board.push(playerMove)
+        print("Player:")
         print(board)
-        print()
-        AIMove = getBestMove(searchDepth, board, True)
-        board.push(AIMove)
-        print(board)
+
+        if(color == 'b'):
+            AIMove = getBestMove(searchDepth, board, True)
+            board.push(AIMove)
+            print("AI:")
+            print(board)
