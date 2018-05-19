@@ -10,7 +10,7 @@
 * 优化局面评估参数，加入新的评估策略
 
 ## 正在进行
-* HashTable
+* HashTable（hash类的初始化）
 
 ## 已完成
 * alpha-beta剪枝优化 5/6
