@@ -1,15 +1,6 @@
-import chess
-import pieceValue as pv
+import sys
+import random as rd
 
-board = chess.Board()
+Pieces = ('p', 'n', 'b', 'q', 'k', 'P', 'N', 'B', 'Q', 'K')
 
-board.set_fen('r2r4/p1p2kpP/2Qbbq2/4p3/8/2N5/pPPP1PPP/R1B1K2R w KQ - 0 12')
-
-print(board)
-
-# for i in board.legal_moves:
-#     print(i)
-board.push_uci("h7h8q")
-print()
-print(board)
-print(board.fen())
+print(['{i}' for i in range(1,9)])
