@@ -256,7 +256,7 @@ if __name__ == '__main__':
         AIDEMO.ManualGame()
     except:
 
-        filename="C:\\Users\\youyaoyin\\OneDrive\\github-space\\chess_ai\\simple_chess_AI\\error.txt"
+        filename="error.txt"
         file_object=open(filename,'w')
         file_object.write(traceback.format_exc())
         file_object.close()
