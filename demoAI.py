@@ -214,8 +214,36 @@ class ChessAIDemo:
                # print("AI:")
                 #print(self.board)
                 #please delete prior two lines during the offical match
-            
-
+    
+    def ManualGame(self):
+        self.board = chess.Board()
+        sys.stderr.write("please input the chess color\n")
+        raw_color=sys.stdin.readline()[:-1]
+        self.InitColor(raw_color)
+        self.InitSearchDepth(1)
+        while self.board.is_game_over() is False:
+            if(self.color == 'w'):
+                AIMove = self.getBestMove(True)
+                self.board.push(AIMove)
+                print("AI:")
+                print(self.board)
+            while True:
+                playerInput = input("\nplease input moves（eg.a1b2 exit退出）：")
+                if playerInput == 'exit':
+                    sys.exit('goodbye^_^\n')
+                playerMove = chess.Move.from_uci(playerInput)
+                if playerMove in self.board.legal_moves:
+                    break
+                else:
+                    print("input illegal")
+            self.board.push(playerMove)
+            print("Player:")
+            print(self.board)
+            if(self.color == 'b'):
+                AIMove = self.getBestMove(True)
+                self.board.push(AIMove)
+                print("AI:")
+                print(self.board)
 """
 程序入口
 """
@@ -224,7 +252,8 @@ if __name__ == '__main__':
    
     try:
         AIDEMO=ChessAIDemo()
-        AIDEMO.GameStart()
+        #AIDEMO.GameStart()
+        AIDEMO.ManualGame()
     except:
 
         filename="C:\\Users\\youyaoyin\\OneDrive\\github-space\\chess_ai\\simple_chess_AI\\error.txt"
