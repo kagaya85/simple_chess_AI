@@ -2,6 +2,7 @@ import chess
 import sys
 import pieceValue as pv
 import traceback
+
 """
 全局参数部分
 color: b 黑色（后手） w 白色（先手）
@@ -95,7 +96,7 @@ class ChessAIDemo:
         if depth == 0:
             return self.evaluateBoard(board.fen())
         if isMax:
-            current = self.expand(depth - 1, board, not isMax, alpha, beta)
+            current=-9999
             value = -9999
             for index, newMove in enumerate(board.legal_moves):
                 board.push(newMove)
@@ -112,7 +113,7 @@ class ChessAIDemo:
                     break
         else:
             value = 9999
-            current = self.expand(depth - 1, board, not isMax, alpha, beta)
+            current=9999
             for index, newMove in enumerate(board.legal_moves):
                 board.push(newMove)
                 if(index == 0):
@@ -168,18 +169,14 @@ class ChessAIDemo:
         raw_color=sys.stdin.readline()[:-1]
         self.InitColor(raw_color)
         self.InitSearchDepth(3)
-        #while self.board.is_game_over() is False:
+
         while True:
             if(self.color=='w'):
                 AIMove = self.getBestMove(True)
                 AIout=self.board.san(AIMove)
                 self.board.push(AIMove)
                 print(AIout)
-                #please delete next two lines during the offical match
-                #print("AI:")
-                #print(self.board)
-                #please delete prior two lines during the offical match
-            
+
 
             while True:
                 sys.stderr.write("\nplease input moves（eg.a1b2 exit退出）：")
@@ -189,31 +186,13 @@ class ChessAIDemo:
                 else:
                     self.board.push_san(AnothersideInput)
                     break
-                #AnothersideMove = chess.Move.from_uci(AnothersideInput)
-
-                # the match rule comfirm that the input is legal,so please delete next lines in the formal match
-                #if AnothersideMove in self.board.legal_moves:
-                #    break
-                #else:
-                #     sys.stderr.write("input illegal")
-                # the match rule comfirm that the input is legal,so please delete prior lines in the formal match
-
-           # print(AnothersideMove)
-
-            #please delete next two lines during the offical match
-          #  print("anotherside:")
-          #  print(self.board)
-            #please delete prior two lines during the offical match
 
             if(self.color == 'b'):
                 AIMove = self.getBestMove(True)
                 AIout=self.board.san(AIMove)
                 self.board.push(AIMove)
                 print(AIout)
-                #please delete next two lines during the offical match
-               # print("AI:")
-                #print(self.board)
-                #please delete prior two lines during the offical match
+            
     
     def ManualGame(self):
         self.board = chess.Board()
@@ -252,8 +231,8 @@ if __name__ == '__main__':
    
     try:
         AIDEMO=ChessAIDemo()
-        #AIDEMO.GameStart()
-        AIDEMO.ManualGame()
+        AIDEMO.GameStart()
+        #AIDEMO.ManualGame()
     except:
 
         filename="error.txt"
