@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAI.py", line 225, in <module>
+    AIDEMO.GameStart()
+  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAI.py", line 172, in GameStart
+    AIMove = self.getBestMove(True)
+  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAI.py", line 138, in getBestMove
+    tempValue = self.expand(self.searchDepth - 1, self.board, not isMax, -10000, 10000)
+  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAI.py", line 127, in expand
+    return current
+UnboundLocalError: local variable 'current' referenced before assignment
