@@ -168,9 +168,16 @@ class ChessAIDemo:
         sys.stderr.write("please input the chess color\n")
         raw_color=sys.stdin.readline()[:-1]
         self.InitColor(raw_color)
-        self.InitSearchDepth(3)
-
+        self.InitSearchDepth(1)
+        count=0
         while True:
+            if(count>=10):
+                self.InitSearchDepth(2)
+            if(count>=20):
+                self.InitSearchDepth(2)
+            if(count>=30):
+                self.InitSearchDepth(3)
+
             if(self.color=='w'):
                 AIMove = self.getBestMove(True)
                 AIout=self.board.san(AIMove)
@@ -192,14 +199,14 @@ class ChessAIDemo:
                 AIout=self.board.san(AIMove)
                 self.board.push(AIMove)
                 print(AIout)
-            
+            count=count+1
     
     def ManualGame(self):
         self.board = chess.Board()
         sys.stderr.write("please input the chess color\n")
         raw_color=sys.stdin.readline()[:-1]
         self.InitColor(raw_color)
-        self.InitSearchDepth(1)
+        self.InitSearchDepth(2)
         while self.board.is_game_over() is False:
             if(self.color == 'w'):
                 AIMove = self.getBestMove(True)
