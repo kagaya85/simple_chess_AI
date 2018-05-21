@@ -81,11 +81,16 @@ def expand(depth, board, isMax, alpha, beta):
     扩展节点，返回评估值
     """
 
+    # 此处查询置换表中是否存在，存在则直接返回
+
     if depth == 0:
-        return evaluateBoard(board.fen())
+        value = evaluateBoard(board.fen()) 
+        # 存入置换表
+        return value
     if isMax:
         value = -9999
         for index, newMove in enumerate(board.legal_moves):
+            # 产生 hashkey
             board.push(newMove)
             if(index == 0):
                 current = expand(depth - 1, board, not isMax, alpha, beta)
@@ -94,6 +99,7 @@ def expand(depth, board, isMax, alpha, beta):
                 if(value > alpha and value < beta):
                     value = max(value, expand(depth - 1, board, not isMax, alpha, beta))
             board.pop()
+            # 复原 hashkey
             current = max(current, value)
             alpha = max(alpha, value)
             if (alpha >= beta):
