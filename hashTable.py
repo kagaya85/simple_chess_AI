@@ -14,14 +14,13 @@ class HashItem:
 
 
 class HashTable:
-    def __init__(self, tableSize):
+    def __init__(self, tableSize = 1024*1024):
         self.tableSize = tableSize
         self._table = [[HashItem()] * tableSize, [HashItem()] * tableSize]    
         self.hashKeyMap = [[[rand64() for k in chess.SQUARES] for piecesType in range(1, 7)] for i in Color]
         self.hashKey64 = 0   # 初始
         self.hashIndexMap = [[[rand32() for k in chess.SQUARES] for piecesType in range(1, 7)] for i in Color]
         self.hashIndex32 = 0
-        
         return
 
 

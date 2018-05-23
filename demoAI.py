@@ -2,31 +2,33 @@ import chess
 import sys
 import pieceValue as pv
 import traceback
+import hashTable as ht
 
-"""
-全局参数部分
-color: b 黑色（后手） w 白色（先手）
-searchDepth: 搜索深度
-需添加防止重复走子的代码
-"""
 
 class ChessAIDemo:
-    color = 'w'
-    searchDepth = 4
-    board=chess.Board()
+    def __init__(self, depth = 3, color = 'w'):
+        """
+        初始化搜索深度以及AI执棋颜色
+        初始化置换表
+            param：
+                depth: 搜索深度
+                color: 执棋颜色(白先黑后)
+        """
+        self.color = color
+        self.searchDepth = int(depth)
+        self.board = chess.Board()
+        self.hashTable = ht.HashTable(1024*1024)
+        self.hashTable.CalculateInitHashKey()
 
-    def InitColor(self,color):
-        if(color=="white"):
-            self.color='w'
-        elif(color=="black"):
-            self.color='b'
+    def InitColor(self, color):
+        if (color == "white"):
+            self.color = 'w'
+        elif (color == "black"):
+            self.color = 'b'
         else:
-            self.color='w'
+            self.color = 'w'
 
-    def InitSearchDepth(self,Depth):
-        self.searchDepth=int(Depth)
-
-    def evaluateBoard(self,fenStr) -> float:
+    def evaluateBoard(self, fenStr) -> float:
         """
         局面评估
         color: 己方颜色
@@ -40,8 +42,7 @@ class ChessAIDemo:
 
         return totalEval
 
-
-    def getPieceValue(self,piece, x, y) -> float:
+    def getPieceValue(self, piece, x, y) -> float:
         """
         根据棋子的类型以及位置返回评估值
         """
@@ -63,8 +64,8 @@ class ChessAIDemo:
                 absoluteValue = 90 + pv.queenEval[y][x]
             elif piece == 'k':
                 absoluteValue = 900 + pv.kingEvalBlack[y][x]
-            
-            if(self.color == 'w'):
+
+            if (self.color == 'w'):
                 return -absoluteValue
             else:
                 return absoluteValue
@@ -81,31 +82,36 @@ class ChessAIDemo:
                 absoluteValue = 90 + pv.queenEval[y][x]
             elif piece == 'K':
                 absoluteValue = 900 + pv.kingEvalWhite[y][x]
-            
-            if(self.color == 'w'):
+
+            if (self.color == 'w'):
                 return absoluteValue
             else:
                 return -absoluteValue
 
-
-    def expand(self,depth, board, isMax, alpha, beta):
+    def expand(self, depth, board, isMax, alpha, beta):
         """
         扩展节点，返回评估值
         """
 
         if depth == 0:
             return self.evaluateBoard(board.fen())
+
         if isMax:
-            current=-9999
+            current = -9999
             value = -9999
             for index, newMove in enumerate(board.legal_moves):
                 board.push(newMove)
-                if(index == 0):
-                    current = self.expand(depth - 1, board, not isMax, alpha, beta)
+                if (index == 0):
+                    current = self.expand(depth - 1, board, not isMax, alpha,
+                                          beta)
                 else:
-                    value = max(value, self.expand(depth - 1, board, not isMax, alpha, alpha + 1))
-                    if(value > alpha and value < beta):
-                        value = max(value, self.expand(depth - 1, board, not isMax, alpha, beta))
+                    value = max(value,
+                                self.expand(depth - 1, board, not isMax, alpha,
+                                            alpha + 1))
+                    if (value > alpha and value < beta):
+                        value = max(value,
+                                    self.expand(depth - 1, board, not isMax,
+                                                alpha, beta))
                 board.pop()
                 current = max(current, value)
                 alpha = max(alpha, value)
@@ -113,15 +119,20 @@ class ChessAIDemo:
                     break
         else:
             value = 9999
-            current=9999
+            current = 9999
             for index, newMove in enumerate(board.legal_moves):
                 board.push(newMove)
-                if(index == 0):
-                    current = self.expand(depth - 1, board, not isMax, alpha, beta)
+                if (index == 0):
+                    current = self.expand(depth - 1, board, not isMax, alpha,
+                                          beta)
                 else:
-                    value = min(value, self.expand(depth - 1, board, not isMax, beta - 1, beta))
-                    if(value > alpha and value < beta):
-                        value = min(value, self.expand(depth - 1, board, not isMax, alpha, beta))
+                    value = min(value,
+                                self.expand(depth - 1, board, not isMax,
+                                            beta - 1, beta))
+                    if (value > alpha and value < beta):
+                        value = min(value,
+                                    self.expand(depth - 1, board, not isMax,
+                                                alpha, beta))
                 board.pop()
                 current = min(current, value)
                 beta = min(beta, value)
@@ -129,8 +140,7 @@ class ChessAIDemo:
                     break
         return current
 
-
-    def getBestMove(self,isMax):
+    def getBestMove(self, isMax):
         """
         用minmax遍历，返回最优移动uci
         """
@@ -138,7 +148,8 @@ class ChessAIDemo:
         bestValue = -9999
         for newMove in self.board.legal_moves:
             self.board.push(newMove)
-            tempValue = self.expand(self.searchDepth - 1, self.board, not isMax, -10000, 10000)
+            tempValue = self.expand(self.searchDepth - 1, self.board,
+                                    not isMax, -10000, 10000)
             if bestValue < tempValue:
                 bestMove = newMove
                 bestValue = tempValue
@@ -146,8 +157,7 @@ class ChessAIDemo:
 
         return bestMove
 
-
-    def replace_tags_board(self,fenStr) -> list:
+    def replace_tags_board(self, fenStr) -> list:
         fenStr = fenStr.split(" ")[0]
         fenStr = fenStr.replace("2", "11")
         fenStr = fenStr.replace("3", "111")
@@ -158,54 +168,49 @@ class ChessAIDemo:
         fenStr = fenStr.replace("8", "11111111")
         return fenStr.split('/')
 
-
-    def is_white_turn(self,fenStr)->bool:
+    def is_white_turn(self, fenStr) -> bool:
         return fenStr.split(" ")[1] == 'w'
-
 
     def GameStart(self):
         self.board = chess.Board()
         sys.stderr.write("please input the chess color\n")
-        raw_color=sys.stdin.readline()[:-1]
+        raw_color = sys.stdin.readline()[:-1]
         self.InitColor(raw_color)
-        self.InitSearchDepth(3)
 
         while True:
-            if(self.color=='w'):
+            if (self.color == 'w'):
                 AIMove = self.getBestMove(True)
-                AIout=self.board.san(AIMove)
+                AIout = self.board.san(AIMove)
                 self.board.push(AIMove)
                 print(AIout)
-
 
             while True:
                 sys.stderr.write("\nplease input moves（eg.a1b2 exit退出）：")
                 AnothersideInput = sys.stdin.readline()[:-1]
-                if  AnothersideInput == 'exit':
+                if AnothersideInput == 'exit':
                     sys.exit('goodbye^_^\n')
                 else:
                     self.board.push_san(AnothersideInput)
                     break
 
-            if(self.color == 'b'):
+            if (self.color == 'b'):
                 AIMove = self.getBestMove(True)
-                AIout=self.board.san(AIMove)
+                AIout = self.board.san(AIMove)
                 self.board.push(AIMove)
                 print(AIout)
-            
-    
+
     def ManualGame(self):
         self.board = chess.Board()
         sys.stderr.write("please input the chess color\n")
-        raw_color=sys.stdin.readline()[:-1]
+        raw_color = sys.stdin.readline()[:-1]
         self.InitColor(raw_color)
-        self.InitSearchDepth(1)
         while self.board.is_game_over() is False:
-            if(self.color == 'w'):
+            if (self.color == 'w'):
                 AIMove = self.getBestMove(True)
                 self.board.push(AIMove)
                 print("AI:")
                 print(self.board)
+
             while True:
                 playerInput = input("\nplease input moves（eg.a1b2 exit退出）：")
                 if playerInput == 'exit':
@@ -216,26 +221,30 @@ class ChessAIDemo:
                 else:
                     print("input illegal")
             self.board.push(playerMove)
+
             print("Player:")
             print(self.board)
-            if(self.color == 'b'):
+
+            if (self.color == 'b'):
                 AIMove = self.getBestMove(True)
                 self.board.push(AIMove)
                 print("AI:")
                 print(self.board)
+
+
 """
 程序入口
 """
 
 if __name__ == '__main__':
-   
+
     try:
-        AIDEMO=ChessAIDemo()
+        AIDEMO = ChessAIDemo()
         AIDEMO.GameStart()
         #AIDEMO.ManualGame()
     except:
 
-        filename="error.txt"
-        file_object=open(filename,'w')
+        filename = "error.txt"
+        file_object = open(filename, 'w')
         file_object.write(traceback.format_exc())
         file_object.close()
