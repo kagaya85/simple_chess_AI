@@ -198,7 +198,6 @@ class ChessAIDemo:
                 AIout = self.board.san(AIMove)
                 self.board.push(AIMove)
                 print(AIout)
-
     def ManualGame(self):
         self.board = chess.Board()
         sys.stderr.write("please input the chess color\n")
