@@ -123,16 +123,12 @@ class ChessAIDemo:
             for index, newMove in enumerate(board.legal_moves):
                 board.push(newMove)
                 if (index == 0):
-                    current = self.expand(depth - 1, board, not isMax, alpha,
-                                          beta)
+                    current = self.expand(depth - 1, board, not isMax, alpha, beta)
                 else:
                     value = min(value,
-                                self.expand(depth - 1, board, not isMax,
-                                            beta - 1, beta))
+                                self.expand(depth - 1, board, not isMax, beta - 1, beta))
                     if (value > alpha and value < beta):
-                        value = min(value,
-                                    self.expand(depth - 1, board, not isMax,
-                                                alpha, beta))
+                        value = min(value, self.expand(depth - 1, board, not isMax, alpha, beta))
                 board.pop()
                 current = min(current, value)
                 beta = min(beta, value)
@@ -148,8 +144,7 @@ class ChessAIDemo:
         bestValue = -9999
         for newMove in self.board.legal_moves:
             self.board.push(newMove)
-            tempValue = self.expand(self.searchDepth - 1, self.board,
-                                    not isMax, -10000, 10000)
+            tempValue = self.expand(self.searchDepth - 1, self.board, not isMax, -10000, 10000)
             if bestValue < tempValue:
                 bestMove = newMove
                 bestValue = tempValue
@@ -198,6 +193,7 @@ class ChessAIDemo:
                 AIout = self.board.san(AIMove)
                 self.board.push(AIMove)
                 print(AIout)
+
     def ManualGame(self):
         self.board = chess.Board()
         sys.stderr.write("please input the chess color\n")
