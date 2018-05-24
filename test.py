@@ -4,6 +4,8 @@ import chess
 import hashTable as ht
 
 
-l = [[[] for piecesType in range(1, 7)] for i in range(2)]
+historyTable = np.zeros((81,81))
 
-print(l)
+historyTable[21][31] = 55
+
+print(historyTable[21][31])

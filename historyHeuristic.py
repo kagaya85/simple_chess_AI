@@ -1,4 +1,5 @@
 import chess
+import numpy as np
 
 
 class HistoryHeuristic:
@@ -7,6 +8,7 @@ class HistoryHeuristic:
     """
 
     def __init__(self):
+        self.historyTable = np.zeros((81,81))
         return
 
 
