@@ -31,7 +31,8 @@ class ChessAIDemo:
     def evaluateBoard(self, fenStr) -> float:
         """
         局面评估
-        color: 己方颜色
+        param:
+            color: 己方颜色
         """
         board = self.replace_tags_board(fenStr)
         totalEval = 0.0
@@ -92,14 +93,13 @@ class ChessAIDemo:
         """
         扩展节点，返回评估值
         """
-        val=self.hashTable.SearchHashTable(depth,alpha, beta,isMax)
+        val = self.hashTable.SearchHashTable(depth, alpha, beta, isMax)
         if(val!=None):
             return val
-        #
-        
+
         if depth == 0:
             val=self.evaluateBoard(self.board.fen())
-            self.hashTable.InsertHashTable(depth,val,self.hashTable.hashKey64,isMax,ht.HashExact)
+            self.hashTable.InsertHashTable(depth, val,self.hashTable.hashKey64, isMax, ht.HashExact)
             return val
         #make NUll move
        # if(depth>=2):
@@ -112,9 +112,7 @@ class ChessAIDemo:
         if isMax:
             value = -9999
             for index, newMove in enumerate(self.board.legal_moves):
-
-                self.hashTable.MakeMove(self.board,newMove)#
-                
+                self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
                 self.board.push(newMove)
                 if (index == 0):
                     value = self.expand(depth - 1, not isMax, alpha,beta)
@@ -123,8 +121,8 @@ class ChessAIDemo:
                     if (value > alpha and value < beta):
                         value = max(value,self.expand(depth - 1,not isMax,alpha, beta))
                 self.board.pop()
-
-                self.hashTable.UndoMove(self.board,newMove)#
+                self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+                
                 alpha = max(alpha, value)
                 if (alpha >= beta):
                     self.hashTable.InsertHashTable(depth,value,self.hashTable.hashKey64,isMax,ht.HashBeta)
@@ -132,6 +130,7 @@ class ChessAIDemo:
         else:
             value = 9999
             for index, newMove in enumerate(self.board.legal_moves):
+                self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
                 self.board.push(newMove)
                 if (index == 0):
                     value = self.expand(depth - 1, not isMax, alpha, beta)
@@ -140,6 +139,8 @@ class ChessAIDemo:
                     if (value > alpha and value < beta):
                         value = min(value, self.expand(depth - 1, not isMax, alpha, beta))
                 self.board.pop()
+                self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+                
                 beta = min(beta, value)
                 if (alpha >= beta):
                     self.hashTable.InsertHashTable(depth,value,self.hashTable.hashKey64,isMax,ht.HashAlpha)

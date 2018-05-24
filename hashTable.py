@@ -40,58 +40,52 @@ class HashTable:
         return
 
 
-    def MakeMove(self, board, move):
+    def MakeMove(self, from_piece, to_piece, move):
         """
         计算移动后的hashKey64,
         
         ps: 请在push之前执行
 
         param：
-            board: 当前的board对象
+            from_piece: 要移动的棋子
+            to_piece: 目标位置的敌方棋子
             move: 将要执行的移动
         """
-        
-        piece = board.piece_at(move.from_square)
 
-        self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[piece.color][piece.piece_type][move.from_square]
-        self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[piece.color][piece.piece_type][move.from_square]
+        self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[from_piece.color][from_piece.piece_type][move.from_square]
+        self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[from_piece.color][from_piece.piece_type][move.from_square]
         
-        self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[piece.color][piece.piece_type][move.to_square]
-        self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[piece.color][piece.piece_type][move.to_square]
-
-        piece = board.piece_at(move.to_square)
+        self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[from_piece.color][from_piece.piece_type][move.to_square]
+        self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[from_piece.color][from_piece.piece_type][move.to_square]
         
-        if piece:
-            self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[piece.color][piece.piece_type][move.to_square]
-            self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[piece.color][piece.piece_type][move.to_square]
+        if to_piece:
+            self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[to_piece.color][to_piece.piece_type][move.to_square]
+            self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[to_piece.color][to_piece.piece_type][move.to_square]
             
         return
 
 
-    def UndoMove(self, board, move):
+    def UndoMove(self, from_piece, to_piece, move):
         """
         恢复移动前的hashKey64,
         
         ps: 请在pop后执行
         
         param：
-            board: 当前的board对象
+            from_piece: 要移动的棋子
+            to_piece: 目标位置的敌方棋子
             move: 要恢复执行的移动
         """
-        
-        piece = board.piece_at(move.from_square)
 
-        self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[piece.color][piece.piece_type][move.from_square]
-        self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[piece.color][piece.piece_type][move.from_square]
+        self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[from_piece.color][from_piece.piece_type][move.from_square]
+        self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[from_piece.color][from_piece.piece_type][move.from_square]
         
-        self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[piece.color][piece.piece_type][move.to_square]
-        self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[piece.color][piece.piece_type][move.to_square]
-
-        piece = board.piece_at(move.to_square)
+        self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[from_piece.color][from_piece.piece_type][move.to_square]
+        self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[from_piece.color][from_piece.piece_type][move.to_square]
         
-        if piece:
-            self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[piece.color][piece.piece_type][move.to_square]
-            self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[piece.color][piece.piece_type][move.to_square]
+        if to_piece:
+            self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[to_piece.color][to_piece.piece_type][move.to_square]
+            self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[to_piece.color][to_piece.piece_type][move.to_square]
             
         return
 
