@@ -6,7 +6,7 @@ import hashTable as ht
 
 
 class ChessAIDemo:
-    def __init__(self, depth = 3, color = 'w'):
+    def __init__(self, depth = 5, color = 'w'):
         """
         初始化搜索深度以及AI执棋颜色
         初始化置换表
@@ -88,53 +88,64 @@ class ChessAIDemo:
             else:
                 return -absoluteValue
 
-    def expand(self, depth, board, isMax, alpha, beta):
+    def expand(self, depth,isMax, alpha, beta):
         """
         扩展节点，返回评估值
         """
-
+        val=self.hashTable.SearchHashTable(depth,alpha, beta,isMax)
+        if(val!=None):
+            return val
+        #
+        
         if depth == 0:
-            return self.evaluateBoard(board.fen())
-
+            val=self.evaluateBoard(self.board.fen())
+            self.hashTable.InsertHashTable(depth,val,self.hashTable.hashKey64,isMax,ht.HashExact)
+            return val
+        #make NUll move
+       # if(depth>=2):
+        #     self.board.push(chess.Move.null())
+       #     val_null=self.expand(depth-2,not isMax,beta - 1, beta)
+        #    self.board.pop()
+        #    if(val_null>=beta):
+        #        return beta
+        #unmakenullmove
         if isMax:
-            current = -9999
             value = -9999
-            for index, newMove in enumerate(board.legal_moves):
-                board.push(newMove)
+            for index, newMove in enumerate(self.board.legal_moves):
+
+                self.hashTable.MakeMove(self.board,newMove)#
+                
+                self.board.push(newMove)
                 if (index == 0):
-                    current = self.expand(depth - 1, board, not isMax, alpha,
-                                          beta)
+                    value = self.expand(depth - 1, not isMax, alpha,beta)
                 else:
-                    value = max(value,
-                                self.expand(depth - 1, board, not isMax, alpha,
-                                            alpha + 1))
+                    value = max(value,self.expand(depth - 1,not isMax, alpha,alpha + 1))
                     if (value > alpha and value < beta):
-                        value = max(value,
-                                    self.expand(depth - 1, board, not isMax,
-                                                alpha, beta))
-                board.pop()
-                current = max(current, value)
+                        value = max(value,self.expand(depth - 1,not isMax,alpha, beta))
+                self.board.pop()
+
+                self.hashTable.UndoMove(self.board,newMove)#
                 alpha = max(alpha, value)
                 if (alpha >= beta):
+                    self.hashTable.InsertHashTable(depth,value,self.hashTable.hashKey64,isMax,ht.HashBeta)
                     break
         else:
             value = 9999
-            current = 9999
-            for index, newMove in enumerate(board.legal_moves):
-                board.push(newMove)
+            for index, newMove in enumerate(self.board.legal_moves):
+                self.board.push(newMove)
                 if (index == 0):
-                    current = self.expand(depth - 1, board, not isMax, alpha, beta)
+                    value = self.expand(depth - 1, not isMax, alpha, beta)
                 else:
-                    value = min(value,
-                                self.expand(depth - 1, board, not isMax, beta - 1, beta))
+                    value = min(value,self.expand(depth - 1, not isMax, beta - 1, beta))
                     if (value > alpha and value < beta):
-                        value = min(value, self.expand(depth - 1, board, not isMax, alpha, beta))
-                board.pop()
-                current = min(current, value)
+                        value = min(value, self.expand(depth - 1, not isMax, alpha, beta))
+                self.board.pop()
                 beta = min(beta, value)
                 if (alpha >= beta):
+                    self.hashTable.InsertHashTable(depth,value,self.hashTable.hashKey64,isMax,ht.HashAlpha)
                     break
-        return current
+      
+        return value
 
     def getBestMove(self, isMax):
         """
@@ -144,7 +155,7 @@ class ChessAIDemo:
         bestValue = -9999
         for newMove in self.board.legal_moves:
             self.board.push(newMove)
-            tempValue = self.expand(self.searchDepth - 1, self.board, not isMax, -10000, 10000)
+            tempValue = self.expand(self.searchDepth -1, not isMax, -10000, 10000)
             if bestValue < tempValue:
                 bestMove = newMove
                 bestValue = tempValue
@@ -233,13 +244,13 @@ class ChessAIDemo:
 
 if __name__ == '__main__':
 
-    try:
         AIDEMO = ChessAIDemo()
         AIDEMO.GameStart()
         #AIDEMO.ManualGame()
-    except:
+'''
 
         filename = "error.txt"
         file_object = open(filename, 'w')
         file_object.write(traceback.format_exc())
         file_object.close()
+'''
