@@ -92,10 +92,12 @@ class ChessAIDemo:
         """
         扩展节点，返回评估值
         """
+        #
         val=self.hashTable.SearchHashTable(depth,alpha, beta,isMax)
         if(val!=None):
             return val
-
+        #
+        
         if depth == 0:
             val=self.evaluateBoard(self.board.fen())
             self.hashTable.InsertHashTable(depth,val,self.hashTable.hashKey64,isMax,ht.HashExact)
