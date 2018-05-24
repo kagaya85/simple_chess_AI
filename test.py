@@ -1,17 +1,9 @@
 import sys
 import numpy as np
 import chess
-
-class HashItem:
-    def __init__(self):
-        self.key = 0
-        self.depth = 0
-        self.flags = 0
-        self.value = 0
-
-table = [[HashItem()] * 3, [HashItem()] * 3]
+import hashTable as ht
 
 
+l = [[[] for piecesType in range(1, 7)] for i in range(2)]
 
-
-print(table[0][1].key)
+print(l)
