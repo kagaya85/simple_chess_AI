@@ -92,7 +92,7 @@ class ChessAIDemo:
         """
         扩展节点，返回评估值
         """
-        #
+       
         val=self.hashTable.SearchHashTable(depth,alpha, beta,isMax)
         if(val!=None):
             return val
@@ -103,12 +103,12 @@ class ChessAIDemo:
             self.hashTable.InsertHashTable(depth,val,self.hashTable.hashKey64,isMax,ht.HashExact)
             return val
         #make NUll move
-        if(depth>=2):
-            self.board.push(chess.Move.null())
-            val_null=self.expand(depth-2,not isMax,beta - 1, beta)
-            self.board.pop()
-            if(val_null>=beta):
-                return beta
+        #if(depth>=2):
+        #    self.board.push(chess.Move.null())
+        #    val_null=self.expand(depth-2,not isMax,beta - 1, beta)
+        #    self.board.pop()
+        #    if(val_null>=beta):
+        #        return beta
         #unmakenullmove
         if isMax:
             current = -9999
@@ -130,7 +130,6 @@ class ChessAIDemo:
                 current = max(current, value)
                 alpha = max(alpha, value)
                 if (alpha >= beta):
-                    self.hashTable.InsertHashTable(depth,current,self.hashTable.hashKey64,isMax,ht.HashAlpha)
                     break
            
         else:
@@ -148,9 +147,8 @@ class ChessAIDemo:
                 current = min(current, value)
                 beta = min(beta, value)
                 if (alpha >= beta):
-                    self.hashTable.InsertHashTable(depth,current,self.hashTable.hashKey64,isMax,ht.HashBeta)
                     break
-           
+
         return current
 
     def getBestMove(self, isMax):
