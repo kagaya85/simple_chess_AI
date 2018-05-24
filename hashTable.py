@@ -1,6 +1,6 @@
 import chess
 import sys
-import numpy as np
+import random
 
 HashFlags = [HashAlpha, HashBeta, HashExact] = [0, 1, 2]
 Color = [True, False]
@@ -17,9 +17,9 @@ class HashTable:
     def __init__(self, tableSize = 1024*1024):
         self.tableSize = tableSize
         self._table = [[HashItem()] * tableSize, [HashItem()] * tableSize]    
-        self.hashKeyMap = [[[rand64() for k in chess.SQUARES] for piecesType in range(1, 7)] for i in Color]
-        self.hashKey64 = 0   # 初始
-        self.hashIndexMap = [[[rand32() for k in chess.SQUARES] for piecesType in range(1, 7)] for i in Color]
+        self.hashKeyMap = [[[rand64() for k in chess.SQUARES] for piecesType in range(7)] for i in Color]
+        self.hashKey64 = 0  # 初始
+        self.hashIndexMap = [[[rand32() for k in chess.SQUARES] for piecesType in range(7)] for i in Color]
         self.hashIndex32 = 0
         return
 
@@ -33,8 +33,9 @@ class HashTable:
  
         for square in chess.SQUARES:
             piece = board.piece_at(square)
-            self.hashKey64 = self.hashKey64 ^ (self.hashKeyMap[piece.color][piece.piece_type][square] if piece != None else 0)
-            self.hashIndex32 = self.hashIndex32 ^ (self.hashIndexMap[piece.color][piece.piece_type][square] if piece != None else 0)
+            if(piece != None):
+                self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[piece.color][piece.piece_type][square]
+                self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[piece.color][piece.piece_type][square]
                 
         return
 
@@ -132,8 +133,8 @@ class HashTable:
 
 
 def rand64():
-    return np.random.randint(0, 0xFFFF_FFFF_FFFF_FFFF, dtype = np.uint64)
+    return random.randint(0, 0xFFFF_FFFF_FFFF_FFFF)
 
 
 def rand32():
-    return np.random.randint(0, 0xFFFF_FFFF, dtype = np.uint32)    
+    return random.randint(0, 0xFFFF_FFFF)    
