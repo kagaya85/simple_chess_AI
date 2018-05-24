@@ -21,5 +21,6 @@ class HistoryHeuristic:
     def InsertHistoryScore(self, move, depth):
         return 
 
-
+    def sort(self):
+        return
 
