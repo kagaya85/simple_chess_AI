@@ -3,9 +3,16 @@ import numpy as np
 import chess
 import hashTable as ht
 
+def test(array):
+    array[0] = 2
+    print("test: {}".format(array[0]))
+    return
 
-historyTable = np.zeros((81,81))
 
-historyTable[21][31] = 55
+board = chess.Board()
+movArr = list()
 
-print(historyTable[21][31])
+for move in board.legal_moves:
+    movArr.append(move)
+
+print(movArr[0].from_square)

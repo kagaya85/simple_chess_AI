@@ -109,9 +109,15 @@ class ChessAIDemo:
         #    if(val_null>=beta):
         #        return beta
         #unmakenullmove
+        """change generator to list"""
+        moveArr = list()
+        for move in self.board.legal_moves:
+            moveArr.append(move)
+        
         if isMax:
             value = -9999
-            for index, newMove in enumerate(self.board.legal_moves):
+
+            for index, newMove in enumerate(moveArr):
                 self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
                 self.board.push(newMove)
                 if (index == 0):
@@ -129,7 +135,7 @@ class ChessAIDemo:
                     break
         else:
             value = 9999
-            for index, newMove in enumerate(self.board.legal_moves):
+            for index, newMove in enumerate(moveArr):
                 self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
                 self.board.push(newMove)
                 if (index == 0):
