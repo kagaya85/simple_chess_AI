@@ -29,19 +29,20 @@ class HistoryHeuristics:
             direction: 排序方向 (true: 按历史得分从大到小 按历史得分false:从小到大)
         """
         if direction == True:
-            moveArr.sort(self.valureCmp)
+            moveArr.sort(key = self.compareKey, reverse = True)
         else:
-            moveArr.sort(self.valureCmp, True)
+            moveArr.sort(key = self.compareKey)
             
 
         return
 
-    def valureCmp(self, mov1, mov2) -> bool:
+    def compareKey(self, mov) -> bool:
         """
-        mov1 < mov2 return Ture
+        return key
         """
-        if (self.historyTable[mov1.from_square][mov1.to_square] <
-                self.historyTable[mov2.from_square][mov2.to_square]):
-            return True
-        else:
-            return False
+        return self.historyTable[mov.from_square][mov.to_square]
+        # if (self.historyTable[mov1.from_square][mov1.to_square] <
+        #         self.historyTable[mov2.from_square][mov2.to_square]):
+        #     return True
+        # else:
+        #     return False

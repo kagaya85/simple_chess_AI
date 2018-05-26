@@ -95,7 +95,7 @@ class ChessAIDemo:
         扩展节点，返回评估值
         """
         val = self.hashTable.SearchHashTable(depth, alpha, beta, isMax)
-        if(val!=None):
+        if(val != 114514):
             return val
 
         if depth == 0 or self.board.is_game_over():
@@ -119,50 +119,51 @@ class ChessAIDemo:
         
         self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
 
-        if isMax:
-            value = -9999
+        # if isMax:
+        #     value = -9999
 
-            for index, newMove in enumerate(moveArr):
-                self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
-                self.board.push(newMove)
+        #     for index, newMove in enumerate(moveArr):
+        #         self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+        #         self.board.push(newMove)
 
-                if (index == 0):
-                    value = self.expand(depth - 1, not isMax, alpha,beta)
-                else:
-                    value = max(value,self.expand(depth - 1,not isMax, alpha,alpha + 1))
-                    if (value > alpha and value < beta):
-                        value = max(value,self.expand(depth - 1,not isMax,alpha, beta))
-                self.board.pop()
-                self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
-                alpha = max(alpha, value)
+        #         if (index == 0):
+        #             value = self.expand(depth - 1, not isMax, alpha,beta)
+        #         else:
+        #             value = max(value,self.expand(depth - 1,not isMax, alpha,alpha + 1))
+        #             if (value > alpha and value < beta):
+        #                 value = max(value,self.expand(depth - 1,not isMax,alpha, beta))
+        #         self.board.pop()
+        #         self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+        #         alpha = max(alpha, value)
 
-                if (alpha >= beta):
-                    self.hashTable.InsertHashTable(depth,value,self.hashTable.hashKey64,isMax,ht.HashBeta)
-                    self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
-                    break   # alpha 剪枝
-        else:
-            value = alpha
-            for index, newMove in enumerate(moveArr):
-                self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
-                self.board.push(newMove)
+        #         if (alpha >= beta):
+        #             self.hashTable.InsertHashTable(depth,value,self.hashTable.hashKey64,isMax,ht.HashBeta)
+        #             self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
+        #             break   # alpha 剪枝
+        # else:
+        a = alpha
+        b = beta
+        for index, newMove in enumerate(moveArr):
+            self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+            self.board.push(newMove)
 
-                if (index == 0):
-                    value = self.expand(depth - 1, not isMax, alpha, beta)
-                else:
-                    value = min(value,self.expand(depth - 1, not isMax, beta - 1, beta))
-                    if (value > alpha and value < beta):
-                        value = min(value, self.expand(depth - 1, not isMax, alpha, beta))
+            tmp = -self.expand(depth - 1, not isMax, -b, -a)
+            if (tmp > a and tmp < b and index > 0):
+                a = self.expand(depth - 1, not isMax, -beta, -tmp)
 
-                self.board.pop()
-                self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
-                beta = min(beta, value)
+            self.board.pop()
+            self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+            
+            a = max(a, tmp)
 
-                if (alpha >= beta):
-                    self.hashTable.InsertHashTable(depth,value,self.hashTable.hashKey64,isMax,ht.HashAlpha)
-                    self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
-                    break   # beta 剪枝
-      
-        return value
+            if (a >= beta):
+                self.hashTable.InsertHashTable(depth, a, self.hashTable.hashKey64, isMax, ht.HashAlpha)
+                self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
+                return a   # beta 剪枝
+
+            b = a + 1
+        
+        return a # def end
 
     def getBestMove(self, isMax):
         """

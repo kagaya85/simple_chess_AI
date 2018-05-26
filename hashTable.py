@@ -16,6 +16,7 @@ class HashItem:
 class HashTable:
     def __init__(self, tableSize = 1024*1024):
         self.tableSize = tableSize
+        """改用np.darray"""
         self._table = [[HashItem()] * tableSize, [HashItem()] * tableSize]    
         self.hashKeyMap = [[[rand64() for k in chess.SQUARES] for piecesType in range(7)] for i in Color]
         self.hashKey64 = 0  # 初始
@@ -108,7 +109,7 @@ class HashTable:
                 if p.value <= alpha:    
                     return p.value
 
-        return None
+        return 114514
 
 
     def InsertHashTable(self, depth, value, key, isMax, flags):
