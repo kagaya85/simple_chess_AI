@@ -3,7 +3,7 @@ import sys
 import pieceValue as pv
 import traceback
 import hashTable as ht
-
+import historyHeuristics as hh
 
 class ChessAIDemo:
     def __init__(self, depth = 5, color = 'w'):
@@ -19,6 +19,7 @@ class ChessAIDemo:
         self.board = chess.Board()
         self.hashTable = ht.HashTable(1024*1024)
         self.hashTable.CalculateInitHashKey()
+        self.historyHeuristics = hh.HistoryHeuristics()
 
     def InitColor(self, color):
         if (color == "white"):
@@ -89,7 +90,7 @@ class ChessAIDemo:
             else:
                 return -absoluteValue
 
-    def expand(self, depth,isMax, alpha, beta):
+    def expand(self, depth, isMax, alpha, beta):
         """
         扩展节点，返回评估值
         """
@@ -97,7 +98,7 @@ class ChessAIDemo:
         if(val!=None):
             return val
 
-        if depth == 0:
+        if depth == 0 or self.board.is_game_over():
             val=self.evaluateBoard(self.board.fen())
             self.hashTable.InsertHashTable(depth, val,self.hashTable.hashKey64, isMax, ht.HashExact)
             return val
@@ -109,17 +110,22 @@ class ChessAIDemo:
         #    if(val_null>=beta):
         #        return beta
         #unmakenullmove
-        """change generator to list"""
+        """
+        change generator to list
+        """
         moveArr = list()
         for move in self.board.legal_moves:
             moveArr.append(move)
         
+        self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
+
         if isMax:
             value = -9999
 
             for index, newMove in enumerate(moveArr):
                 self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
                 self.board.push(newMove)
+
                 if (index == 0):
                     value = self.expand(depth - 1, not isMax, alpha,beta)
                 else:
@@ -128,29 +134,33 @@ class ChessAIDemo:
                         value = max(value,self.expand(depth - 1,not isMax,alpha, beta))
                 self.board.pop()
                 self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
-                
                 alpha = max(alpha, value)
+
                 if (alpha >= beta):
                     self.hashTable.InsertHashTable(depth,value,self.hashTable.hashKey64,isMax,ht.HashBeta)
-                    break
+                    self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
+                    break   # alpha 剪枝
         else:
-            value = 9999
+            value = alpha
             for index, newMove in enumerate(moveArr):
                 self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
                 self.board.push(newMove)
+
                 if (index == 0):
                     value = self.expand(depth - 1, not isMax, alpha, beta)
                 else:
                     value = min(value,self.expand(depth - 1, not isMax, beta - 1, beta))
                     if (value > alpha and value < beta):
                         value = min(value, self.expand(depth - 1, not isMax, alpha, beta))
+
                 self.board.pop()
                 self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
-                
                 beta = min(beta, value)
+
                 if (alpha >= beta):
                     self.hashTable.InsertHashTable(depth,value,self.hashTable.hashKey64,isMax,ht.HashAlpha)
-                    break
+                    self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
+                    break   # beta 剪枝
       
         return value
 

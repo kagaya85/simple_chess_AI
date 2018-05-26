@@ -2,7 +2,7 @@ import chess
 import numpy as np
 
 
-class HistoryHeuristic:
+class HistoryHeuristics:
     """
     历史启发记录
     """
@@ -19,7 +19,7 @@ class HistoryHeuristic:
     def InsertHistoryScore(self, move, depth):
         self.historyTable[move.from_square][move.to_square] += 2 << depth
 
-    def moveSort(self, moveArr, len, direction) -> list:
+    def moveSort(self, moveArr, len, direction = True) -> list:
         """
         对合法行动数组排序
         
@@ -28,7 +28,11 @@ class HistoryHeuristic:
             len: the length of moveArr
             direction: 排序方向 (true: 按历史得分从大到小 按历史得分false:从小到大)
         """
-        moveArr.sort(self.valureCmp)
+        if direction == True:
+            moveArr.sort(self.valureCmp)
+        else:
+            moveArr.sort(self.valureCmp, True)
+            
 
         return
 
