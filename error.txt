@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "c:\Users\kagaya\OneDrive\Artificial Intelligence\demo\demoAI.py", line 237, in <module>
-    AIDEMO = ChessAIDemo()
-  File "c:\Users\kagaya\OneDrive\Artificial Intelligence\demo\demoAI.py", line 21, in __init__
-    self.hashTable.CalculateInitHashKey()
-  File "c:\Users\kagaya\OneDrive\Artificial Intelligence\demo\hashTable.py", line 37, in CalculateInitHashKey
-    self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[piece.color][piece.piece_type][square]
-IndexError: list index out of range

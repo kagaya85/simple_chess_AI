@@ -11,6 +11,7 @@ class HistoryHeuristics:
         self.historyTable = np.zeros((81, 81))
 
     def ResetHistoryTable(self):
+        del self.historyTable
         self.historyTable = np.zeros((81, 81))
 
     def GetHistoryScore(self, move):

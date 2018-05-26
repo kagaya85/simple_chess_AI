@@ -17,7 +17,7 @@ class ChessAIDemo:
         self.color = color
         self.searchDepth = int(depth)
         self.board = chess.Board()
-        self.hashTable = ht.HashTable(1024*1024)
+        self.hashTable = ht.HashTable()
         self.hashTable.CalculateInitHashKey()
         self.historyHeuristics = hh.HistoryHeuristics()
 
@@ -100,7 +100,7 @@ class ChessAIDemo:
 
         if depth == 0 or self.board.is_game_over():
             val=self.evaluateBoard(self.board.fen())
-            self.hashTable.InsertHashTable(depth, val,self.hashTable.hashKey64, isMax, ht.HashExact)
+            self.hashTable.InsertHashTable(depth, val, isMax, ht.HashExact)
             return val
         #make NUll move
        # if(depth>=2):
@@ -143,6 +143,8 @@ class ChessAIDemo:
         # else:
         a = alpha
         b = beta
+        bestMove = moveArr[0]
+        eval_is_exact = False
         for index, newMove in enumerate(moveArr):
             self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
             self.board.push(newMove)
@@ -218,7 +220,7 @@ class ChessAIDemo:
                 print(AIout)
 
             while True:
-                sys.stderr.write("\nplease input moves（eg.a1b2 exit退出）：")
+                sys.stderr.write("\nplease input moves：")
                 AnothersideInput = sys.stdin.readline()[:-1]
                 if AnothersideInput == 'exit':
                     sys.exit('goodbye^_^\n')
@@ -270,14 +272,13 @@ class ChessAIDemo:
 """
 
 if __name__ == '__main__':
-
+    try:
         AIDEMO = ChessAIDemo()
         AIDEMO.GameStart()
         #AIDEMO.ManualGame()
-'''
 
+    except:
         filename = "error.txt"
         file_object = open(filename, 'w')
         file_object.write(traceback.format_exc())
         file_object.close()
-'''

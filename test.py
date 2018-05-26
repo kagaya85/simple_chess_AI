@@ -11,15 +11,9 @@ dt = np.dtype([
         ('value', np.int)
         ])
 
-table = np.zeros((2,10), dtype = dt)
+table = np.zeros((2, 1024*1024), dtype = dt)
 
-table[0][1]['key'] = 1
+table[0][1004044]['key'] = 1
 
-print(id(table[0][1]))
-print(id(table[0][2]))
-print(id(table[0][3]))
-print(id(table[0][4]))
-print(id(table[0]))
-print(id(table[1]))
 
-print(table)
+print(table[0][1004044]['key'])
