@@ -99,7 +99,7 @@ class ChessAIDemo:
             return val
 
         if depth == 0 or self.board.is_game_over():
-            val=self.evaluateBoard(self.board.fen())
+            val = self.evaluateBoard(self.board.fen())
             self.hashTable.InsertHashTable(depth, val, isMax, ht.HashExact)
             return val
         #make NUll move
@@ -179,17 +179,23 @@ class ChessAIDemo:
 
     def getBestMove(self, isMax):
         """
-        用minmax遍历，返回最优移动uci
+        返回最优移动mov
         """
-
+        moveArr = list()
+        for move in self.board.legal_moves:
+            moveArr.append(move)
+        
+        self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
         bestValue = -9999
-        for newMove in self.board.legal_moves:
+        for newMove in moveArr:
+            self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
             self.board.push(newMove)
             tempValue = self.expand(self.searchDepth -1, not isMax, -10000, 10000)
             if bestValue < tempValue:
                 bestMove = newMove
                 bestValue = tempValue
             self.board.pop()
+            self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
 
         return bestMove
 
