@@ -149,7 +149,10 @@ class ChessAIDemo:
 
             tmp = -self.expand(depth - 1, not isMax, -b, -a)
             if (tmp > a and tmp < b and index > 0):
-                a = self.expand(depth - 1, not isMax, -beta, -tmp)
+                a = -self.expand(depth - 1, not isMax, -beta, -tmp)
+                eval_is_exact = True
+                bestMove = newMove
+                
 
             self.board.pop()
             self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
@@ -157,12 +160,18 @@ class ChessAIDemo:
             a = max(a, tmp)
 
             if (a >= beta):
-                self.hashTable.InsertHashTable(depth, a, self.hashTable.hashKey64, isMax, ht.HashAlpha)
+                self.hashTable.InsertHashTable(depth, a, isMax, ht.HashAlpha)
                 self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
                 return a   # beta 剪枝
 
             b = a + 1
         
+        self.historyHeuristics.InsertHistoryScore(bestMove, depth)
+        if eval_is_exact:
+            self.hashTable.InsertHashTable(depth, a, isMax, ht.HashExact)
+        else:
+            self.hashTable.InsertHashTable(depth, a, isMax, ht.HashBeta)
+
         return a # def end
 
     def getBestMove(self, isMax):

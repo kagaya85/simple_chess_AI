@@ -1,23 +1,21 @@
 import chess
 import sys
 import random
+import numpy as np
 
 HashFlags = [HashAlpha, HashBeta, HashExact] = [0, 1, 2]
 Color = [True, False]
 
-class HashItem:
-    def __init__(self):
-        self.key = 0
-        self.depth = 0
-        self.flags = 0
-        self.value = 0
-
-
 class HashTable:
     def __init__(self, tableSize = 1024*1024):
         self.tableSize = tableSize
-        """改用np.darray"""
-        self._table = [[HashItem()] * tableSize, [HashItem()] * tableSize]    
+        dt = np.dtype([
+        ('key', np.uint64),
+        ('depth', np.int),
+        ('type', np.int),
+        ('value', np.int)
+        ])
+        self._table = np.zeros((2,tableSize), dtype = dt)    
         self.hashKeyMap = [[[rand64() for k in chess.SQUARES] for piecesType in range(7)] for i in Color]
         self.hashKey64 = 0  # 初始
         self.hashIndexMap = [[[rand32() for k in chess.SQUARES] for piecesType in range(7)] for i in Color]
@@ -99,30 +97,30 @@ class HashTable:
         self.hashIndex32 = self.hashIndex32 % self.tableSize
         p = self._table[isMax][self.hashIndex32]        
 
-        if p.depth >= depth and p.key == self.hashKey64:
-            if p.flags == HashExact:
-                return p.value
-            elif p.flags == HashAlpha:
-                if p.value >= beta:
-                    return p.value
-            elif p.flags == HashBeta:
-                if p.value <= alpha:    
-                    return p.value
+        if p['depth'] >= depth and p['key'] == self.hashKey64:
+            if p['type'] == HashExact:
+                return p['value']
+            elif p['type'] == HashAlpha:
+                if p['value'] >= beta:
+                    return p['value']
+            elif p['type'] == HashBeta:
+                if p['value'] <= alpha:    
+                    return p['value']
 
         return 114514
 
 
-    def InsertHashTable(self, depth, value, key, isMax, flags):
+    def InsertHashTable(self, depth, value, isMax, types):
         """
         Insert item into HashTable
         """
         
         self.hashIndex32 = self.hashIndex32 % self.tableSize
         
-        self._table[isMax][self.hashIndex32].key = self.hashKey64
-        self._table[isMax][self.hashIndex32].depth = depth
-        self._table[isMax][self.hashIndex32].value = value
-        self._table[isMax][self.hashIndex32].flags = flags
+        self._table[isMax][self.hashIndex32]['key'] = self.hashKey64
+        self._table[isMax][self.hashIndex32]['depth'] = depth
+        self._table[isMax][self.hashIndex32]['value'] = value
+        self._table[isMax][self.hashIndex32]['type'] = types
 
         return
 
