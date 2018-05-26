@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "c:\Users\kagaya\OneDrive\Artificial Intelligence\demo\demoAI.py", line 277, in <module>
+    AIDEMO.GameStart()
+  File "c:\Users\kagaya\OneDrive\Artificial Intelligence\demo\demoAI.py", line 217, in GameStart
+    AIMove = self.getBestMove(True)
+  File "c:\Users\kagaya\OneDrive\Artificial Intelligence\demo\demoAI.py", line 187, in getBestMove
+    tempValue = self.expand(self.searchDepth -1, not isMax, -10000, 10000)
+  File "c:\Users\kagaya\OneDrive\Artificial Intelligence\demo\demoAI.py", line 155, in expand
+    value = self.expand(depth - 1, not isMax, alpha, beta)
+  File "c:\Users\kagaya\OneDrive\Artificial Intelligence\demo\demoAI.py", line 131, in expand
+    value = self.expand(depth - 1, not isMax, alpha, beta)
+  File "c:\Users\kagaya\OneDrive\Artificial Intelligence\demo\demoAI.py", line 157, in expand
+    value = min(value, self.expand(depth - 1, not isMax, beta - 1, beta))
+  File "c:\Users\kagaya\OneDrive\Artificial Intelligence\demo\demoAI.py", line 173, in expand
+    self.historyHeuristics.InsertHistoryScore(bestMove, depth)
+UnboundLocalError: local variable 'bestMove' referenced before assignment
