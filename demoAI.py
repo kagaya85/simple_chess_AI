@@ -23,8 +23,8 @@ class ChessAIDemo:
         self.hashTable.CalculateInitHashKey()
         self.historyHeuristics = hh.HistoryHeuristics()
         self.startTime = 0
-        self.timeOver = False
-        self.timeLimit = 3000   # 3s
+        self.timeOver = True
+        self.timeLimit = 2   # 2s
 
     def InitColor(self, color):
         if (color == "white"):
