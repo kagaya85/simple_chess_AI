@@ -16,9 +16,9 @@ class HashTable:
             ('value', np.int16)
         ])
         self._table = np.zeros((2, tableSize), dtype = dt)    
-        self.hashKeyMap = [[[rand64() for k in chess.SQUARES] for piecesType in range(7)] for i in Color]
+        self.hashKeyMap = [[[self.rand64() for k in chess.SQUARES] for piecesType in range(7)] for i in Color]
         self.hashKey64 = 0  # 初始
-        self.hashIndexMap = [[[rand32() for k in chess.SQUARES] for piecesType in range(7)] for i in Color]
+        self.hashIndexMap = [[[self.rand32() for k in chess.SQUARES] for piecesType in range(7)] for i in Color]
         self.hashIndex32 = 0
         return
 
@@ -125,9 +125,9 @@ class HashTable:
         return
 
 
-def rand64():
-    return random.randint(0, 0xFFFF_FFFF_FFFF_FFFF)
+    def rand64(self):
+        return random.randint(0, 0xFFFF_FFFF_FFFF_FFFF)
 
 
-def rand32():
-    return random.randint(0, 0xFFFF_FFFF)    
+    def rand32(self):
+        return random.randint(0, self.tableSize)    

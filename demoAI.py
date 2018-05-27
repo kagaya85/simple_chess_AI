@@ -4,9 +4,10 @@ import pieceValue as pv
 import traceback
 import hashTable as ht
 import historyHeuristics as hh
+import time
 
 class ChessAIDemo:
-    def __init__(self, depth = 5, color = 'w'):
+    def __init__(self, initdepth = 3, color = 'w'):
         """
         初始化搜索深度以及AI执棋颜色
         初始化置换表
@@ -15,11 +16,15 @@ class ChessAIDemo:
                 color: 执棋颜色(白先黑后)
         """
         self.color = color
-        self.searchDepth = int(depth)
+        self.initDepth = int(initdepth)
+        self.searchDepth = int(initdepth)
         self.board = chess.Board()
         self.hashTable = ht.HashTable()
         self.hashTable.CalculateInitHashKey()
         self.historyHeuristics = hh.HistoryHeuristics()
+        self.startTime = 0
+        self.timeOver = False
+        self.timeLimit = 3000   # 3s
 
     def InitColor(self, color):
         if (color == "white"):
@@ -95,8 +100,14 @@ class ChessAIDemo:
         扩展节点，返回评估值
         """
         val = self.hashTable.SearchHashTable(depth, alpha, beta, isMax)
-        if(val != 114514):
+        if val != 114514:
             return val
+
+        if int(time.time()) - self.startTime >= self.timeLimit:
+            self.timeOver = True
+            depth = 0
+        else:
+            self.timeOver = False
 
         if depth == 0 or self.board.is_game_over():
             val = self.evaluateBoard(self.board.fen())
@@ -131,9 +142,9 @@ class ChessAIDemo:
                 if (index == 0):
                     value = self.expand(depth - 1, not isMax, alpha, beta)
                 else:
-                    value = max(value,self.expand(depth - 1, not isMax, alpha, alpha + 1))
+                    value = max(value, self.expand(depth - 1, not isMax, alpha, alpha + 1))
                     if (value > alpha and value < beta):
-                        value = max(value,self.expand(depth - 1,not isMax, alpha, beta))
+                        value = max(value, self.expand(depth - 1,not isMax, alpha, beta))
                         eval_is_exact = True
                         bestMove = moveArr[index]
 
@@ -144,7 +155,7 @@ class ChessAIDemo:
                 if (alpha >= beta):
                     self.hashTable.InsertHashTable(depth, value, isMax, ht.HashAlpha)
                     self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
-                    break   # alpha 剪枝
+                    return alpha   # alpha 剪枝
         else:   # isMin
             value = 9999
 
@@ -168,7 +179,7 @@ class ChessAIDemo:
                 if (alpha >= beta):
                     self.hashTable.InsertHashTable(depth, value, isMax, ht.HashBeta)
                     self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
-                    break   # beta 剪枝
+                    return beta   # beta 剪枝
 
 
         self.historyHeuristics.InsertHistoryScore(bestMove, depth)
@@ -181,6 +192,9 @@ class ChessAIDemo:
         """
         返回最优移动mov
         """
+        if(self.timeOver == False):     # 上次最后一次搜索没有超时，则递归层数+1
+            self.searchDepth = self.searchDepth + 1
+
         moveArr = list()
         for move in self.board.legal_moves:
             moveArr.append(move)
@@ -188,6 +202,7 @@ class ChessAIDemo:
         self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
         bestValue = -9999
         for newMove in moveArr:
+            self.startTime = int(time.time())
             self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
             self.board.push(newMove)
             tempValue = self.expand(self.searchDepth -1, not isMax, -10000, 10000)
@@ -215,7 +230,7 @@ class ChessAIDemo:
 
     def GameStart(self):
         self.board = chess.Board()
-        sys.stderr.write("please input the chess color\n")
+        sys.stderr.write("Link Start!\n")
         raw_color = sys.stdin.readline()[:-1]
         self.InitColor(raw_color)
 
@@ -227,7 +242,7 @@ class ChessAIDemo:
                 print(AIout)
 
             while True:
-                sys.stderr.write("\nplease input moves：")
+                sys.stderr.write("当前搜索层数：{}层\n".format(self.searchDepth))
                 AnothersideInput = sys.stdin.readline()[:-1]
                 if AnothersideInput == 'exit':
                     sys.exit('goodbye^_^\n')
