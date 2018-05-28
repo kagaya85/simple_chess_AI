@@ -191,9 +191,9 @@ class ChessAIDemo:
         return value  # def end
 
     def expandEx(self, depth, isMax, alpha, beta):
-        # val = self.hashTable.SearchHashTable(depth, alpha, beta, isMax)
-        # if val != 114514:
-        #     return val
+        val = self.hashTable.SearchHashTable(depth, alpha, beta, isMax)
+        if val != 114514:
+            return val
 
         if int(time.time()) - self.startTime >= self.timeLimit:
             self.timeOver = True
@@ -270,6 +270,7 @@ class ChessAIDemo:
         
         self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
         bestValue = -9999
+        #bestMove = chess.Move.null()
         for newMove in moveArr:
             self.startTime = int(time.time())
             self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
@@ -310,14 +311,11 @@ class ChessAIDemo:
                 self.board.push(AIMove)
                 print(AIout)
 
-            while True:
-                sys.stderr.write("当前搜索层数：{}层\n".format(self.searchDepth))
-                AnothersideInput = sys.stdin.readline()[:-1]
-                if AnothersideInput == 'exit':
-                    sys.exit('goodbye^_^\n')
-                else:
-                    self.board.push_san(AnothersideInput)
-                    break
+            sys.stderr.write("当前搜索层数：{}层\n".format(self.searchDepth))
+            AnothersideInput = sys.stdin.readline()[:-1]
+            opponentMove = self.board.parse_san(AnothersideInput)
+            self.hashTable.MakeMove(self.board.piece_at(opponentMove.from_square), self.board.piece_at(opponentMove.to_square), opponentMove)
+            self.board.push_san(AnothersideInput)
 
             if (self.color == 'b'):
                 AIMove = self.getBestMove(True)
@@ -334,18 +332,19 @@ class ChessAIDemo:
             if (self.color == 'w'):
                 AIMove = self.getBestMove(True)
                 self.board.push(AIMove)
-                print("AI:")
+                print("AI:当前搜索层数：{}层".format(self.searchDepth))
                 print(self.board)
 
             while True:
                 playerInput = input("\nplease input moves（eg.a1b2 exit退出）：")
                 if playerInput == 'exit':
                     sys.exit('goodbye^_^\n')
-                playerMove = chess.Move.from_uci(playerInput)
+                playerMove = self.board.parse_uci(playerInput)
                 if playerMove in self.board.legal_moves:
                     break
                 else:
                     print("input illegal")
+            self.hashTable.MakeMove(self.board.piece_at(playerMove.from_square), self.board.piece_at(playerMove.to_square), playerMove)
             self.board.push(playerMove)
 
             print("Player:")
@@ -366,7 +365,7 @@ if __name__ == '__main__':
     try:
         AIDEMO = ChessAIDemo()
         AIDEMO.GameStart()
-        #AIDEMO.ManualGame()
+        # AIDEMO.ManualGame()
 
     except:
         filename = "error.txt"
