@@ -24,7 +24,7 @@ class ChessAIDemo:
         self.historyHeuristics = hh.HistoryHeuristics()
         self.startTime = 0
         self.timeOver = True
-        self.timeLimit = 2   # 2s
+        self.timeLimit = 1   # 1s
 
     def InitColor(self, color):
         if (color == "white"):
@@ -64,7 +64,7 @@ class ChessAIDemo:
             elif piece == 'r':
                 absoluteValue = 50 + pv.rookEvalBlack[y][x]
             elif piece == 'n':
-                absoluteValue = 30 + pv.knightEval[y][x]
+                absoluteValue = 40 + pv.knightEval[y][x]
             elif piece == 'b':
                 absoluteValue = 30 + pv.bishopEvalBlack[y][x]
             elif piece == 'q':
@@ -82,7 +82,7 @@ class ChessAIDemo:
             elif piece == 'R':
                 absoluteValue = 50 + pv.rookEvalWhite[y][x]
             elif piece == 'N':
-                absoluteValue = 30 + pv.knightEval[y][x]
+                absoluteValue = 40 + pv.knightEval[y][x]
             elif piece == 'B':
                 absoluteValue = 30 + pv.bishopEvalWhite[y][x]
             elif piece == 'Q':
@@ -99,9 +99,9 @@ class ChessAIDemo:
         """
         扩展节点，返回评估值
         """
-        val = self.hashTable.SearchHashTable(depth, alpha, beta, isMax)
-        if val != 114514:
-            return val
+        # val = self.hashTable.SearchHashTable(depth, alpha, beta, isMax)
+        # if val != 114514:
+        #     return val
 
         if int(time.time()) - self.startTime >= self.timeLimit:
             self.timeOver = True
@@ -188,6 +188,73 @@ class ChessAIDemo:
 
         return value  # def end
 
+    def expandEx(self, depth, isMax, alpha, beta):
+        # val = self.hashTable.SearchHashTable(depth, alpha, beta, isMax)
+        # if val != 114514:
+        #     return val
+
+        if int(time.time()) - self.startTime >= self.timeLimit:
+            self.timeOver = True
+            depth = 0
+        else:
+            self.timeOver = False
+
+        if depth == 0 or self.board.is_game_over():
+            val = self.evaluateBoard(self.board.fen())
+            self.hashTable.InsertHashTable(depth, val, isMax, ht.HashExact)
+            return val
+        #make NUll move
+        # if(depth>=2):
+        #     self.board.push(chess.Move.null())
+        #     val_null=self.expand(depth-2,not isMax,beta - 1, beta)
+        #    self.board.pop()
+        #    if(val_null>=beta):
+        #        return beta
+        #unmakenullmove
+        """
+        change generator to list
+        """
+        moveArr = list()
+        for move in self.board.legal_moves:
+            moveArr.append(move)
+        
+        self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
+
+        eval_is_exact = False
+        bestMove = chess.Move.null()
+        a = alpha
+        b = beta
+        for index, newMove in enumerate(moveArr):
+            self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+            self.board.push(newMove)
+            t = -self.expandEx(depth-1, not isMax, -b, -a)
+            if t > a and t < beta and index > 0:
+                a = -self.expandEx(depth-1, not isMax, -beta, -t)
+                eval_is_exact = True
+                bestMove = newMove
+            self.board.pop()
+            self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+
+            if a < t:
+                eval_is_exact = True
+                a = t
+
+            if a >= beta:
+                self.hashTable.InsertHashTable(depth, a, isMax, ht.HashAlpha)
+                self.historyHeuristics.InsertHistoryScore(newMove, depth)
+                return a
+
+            b = a + 1    
+
+        self.historyHeuristics.InsertHistoryScore(bestMove, depth)
+
+        if eval_is_exact:
+            self.hashTable.InsertHashTable(depth, a, isMax, ht.HashExact)
+        else:
+            self.hashTable.InsertHashTable(depth, a, isMax, ht.HashBeta)
+
+        return a
+
     def getBestMove(self, isMax):
         """
         返回最优移动mov
@@ -205,7 +272,7 @@ class ChessAIDemo:
             self.startTime = int(time.time())
             self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
             self.board.push(newMove)
-            tempValue = self.expand(self.searchDepth -1, not isMax, -10000, 10000)
+            tempValue = self.expandEx(self.searchDepth -1, not isMax, -10000, 10000)
             if bestValue < tempValue:
                 bestMove = newMove
                 bestValue = tempValue

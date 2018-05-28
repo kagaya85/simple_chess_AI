@@ -53,13 +53,13 @@ class HashTable:
 
         self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[from_piece.color][from_piece.piece_type][move.from_square]
         self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[from_piece.color][from_piece.piece_type][move.from_square]
-        
-        self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[from_piece.color][from_piece.piece_type][move.to_square]
-        self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[from_piece.color][from_piece.piece_type][move.to_square]
-        
+    
         if to_piece:
             self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[to_piece.color][to_piece.piece_type][move.to_square]
             self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[to_piece.color][to_piece.piece_type][move.to_square]
+        
+        self.hashKey64 = self.hashKey64 ^ self.hashKeyMap[from_piece.color][from_piece.piece_type][move.to_square]
+        self.hashIndex32 = self.hashIndex32 ^ self.hashIndexMap[from_piece.color][from_piece.piece_type][move.to_square]
             
         return
 
@@ -94,7 +94,7 @@ class HashTable:
         Search item in HashTable
         """
 
-        self.hashIndex32 = self.hashIndex32 % self.tableSize
+        self.hashIndex32 = self.hashIndex32 & 0xFFFFF
         p = self._table[1 if isMax==True else 0][self.hashIndex32]        
 
         if p['depth'] >= depth and p['key'] == self.hashKey64:
@@ -115,7 +115,7 @@ class HashTable:
         Insert item into HashTable
         """
         index = 1 if isMax==True else 0
-        self.hashIndex32 = self.hashIndex32 % self.tableSize
+        self.hashIndex32 = self.hashIndex32 & 0xFFFFF   # 20bit hash address
         
         self._table[index][self.hashIndex32]['key'] = self.hashKey64
         self._table[index][self.hashIndex32]['depth'] = depth
