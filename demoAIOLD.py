@@ -93,7 +93,7 @@ class ChessAIDemo:
         扩展节点，返回评估值
         """
 
-        if depth == 0:
+        if depth == 0 or self.board.is_game_over(True):
             return self.evaluateBoard(self.board.fen())
 
         if isMax:
