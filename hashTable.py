@@ -20,6 +20,7 @@ class HashTable:
         self.hashKey64 = 0  # 初始
         self.hashIndexMap = [[[self.rand32() for k in chess.SQUARES] for piecesType in range(7)] for i in Color]
         self.hashIndex32 = 0
+        self.enable=True
         return
 
 
@@ -93,6 +94,8 @@ class HashTable:
         """
         Search item in HashTable
         """
+        if(self.enable==False):
+            return 114514
 
         self.hashIndex32 = self.hashIndex32 & 0xFFFFF
         p = self._table[1 if isMax==True else 0][self.hashIndex32]        
