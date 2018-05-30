@@ -60,7 +60,7 @@ class ChessAIDemo:
         absoluteValue = 0
         if piece.color == False:  # black
             if piece.piece_type == chess.PAWN:
-                absoluteValue = 10 + pv.pawnEvalBlack[y][x]
+                absoluteValue = 20 + pv.pawnEvalBlack[y][x]
             elif piece.piece_type == chess.ROOK:
                 absoluteValue = 50 + pv.rookEvalBlack[y][x]
             elif piece.piece_type == chess.KNIGHT:
@@ -264,24 +264,24 @@ class ChessAIDemo:
                 bestValue=tempValue
                 lastValue=tempValue
                 bestMove=newMove
-                lastmove=newMove
+                # lastmove=newMove
             elif bestValue!=-10000 and (bestValue==lastValue) and bestValue < tempValue :
                 lastValue=bestValue
                 bestValue=tempValue
-                lastmove=bestMove
+                # lastmove=bestMove
                 bestMove=newMove
             elif bestValue!=-10000 and (bestValue==lastValue) and bestValue > tempValue :
                 lastValue=tempValue
-                lastmove=newMove
+                # lastmove=newMove
             elif bestValue > tempValue and lastValue > tempValue:
                 pass
             elif bestValue > tempValue and lastValue < tempValue:
                 lastValue=tempValue
-                lastmove=newMove
+                # lastmove=newMove
             elif bestValue < tempValue and lastValue < tempValue:
                 lastValue=bestValue
                 bestValue=tempValue
-                lastmove=bestMove
+                # lastmove=bestMove
                 bestMove=newMove
             else:
                 pass
