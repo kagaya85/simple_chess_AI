@@ -117,10 +117,11 @@ class HashTable:
         index = 1 if isMax==True else 0
         self.hashIndex32 = self.hashIndex32 & 0xFFFFF   # 20bit hash address
         
-        self._table[index][self.hashIndex32]['key'] = self.hashKey64
-        self._table[index][self.hashIndex32]['depth'] = depth
-        self._table[index][self.hashIndex32]['value'] = value
-        self._table[index][self.hashIndex32]['type'] = types
+        item = self._table[index][self.hashIndex32]
+        item['key'] = self.hashKey64
+        item['depth'] = depth
+        item['value'] = value
+        item['type'] = types
 
         return
 

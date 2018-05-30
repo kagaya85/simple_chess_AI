@@ -6,7 +6,7 @@ import hashTable as ht
 import historyHeuristics as hh
 
 class ChessAIDemo:
-    def __init__(self, depth = 3, color = 'w'):
+    def __init__(self, depth = 4, color = 'w'):
         """
         初始化搜索深度以及AI执棋颜色
         初始化置换表
@@ -29,41 +29,43 @@ class ChessAIDemo:
         else:
             self.color = 'w'
 
-    def evaluateBoard(self, fenStr) -> float:
+    def evaluateBoard(self) -> float:
         """
         局面评估
         color: 己方颜色
         """
-        board = self.replace_tags_board(fenStr)
         totalEval = 0.0
 
-        for y in range(8):
-            for x in range(8):
-                totalEval += self.getPieceValue(board[y][x], x, y)
+        for square in chess.SQUARES:
+            totalEval += self.getPieceValue(square)
 
         return totalEval
 
-    def getPieceValue(self, piece, x, y) -> float:
+    def getPieceValue(self, square) -> float:
         """
         根据棋子的类型以及位置返回评估值
         """
 
-        if piece == 1:
+        piece = self.board.piece_at(square)
+        if piece == None:
             return 0
+        
+        x = chess.square_file(square)
+        y = chess.square_rank(square)
 
         absoluteValue = 0
-        if piece.islower():  # black
-            if piece == 'p':
+        if piece.color == False:  # black
+            if piece.piece_type == chess.PAWN:
                 absoluteValue = 10 + pv.pawnEvalBlack[y][x]
-            elif piece == 'r':
+            elif piece.piece_type == chess.ROOK:
                 absoluteValue = 50 + pv.rookEvalBlack[y][x]
-            elif piece == 'n':
-                absoluteValue = 30 + pv.knightEval[y][x]
-            elif piece == 'b':
+            elif piece.piece_type == chess.KNIGHT:
+                absoluteValue = 40 + pv.knightEval[y][x]
+            elif piece.piece_type == chess.BISHOP:
                 absoluteValue = 30 + pv.bishopEvalBlack[y][x]
-            elif piece == 'q':
+            elif piece.piece_type == chess.QUEEN:
                 absoluteValue = 90 + pv.queenEval[y][x]
-            elif piece == 'k':
+            elif piece.piece_type == chess.KING:
                 absoluteValue = 900 + pv.kingEvalBlack[y][x]
 
             if (self.color == 'w'):
@@ -71,17 +73,17 @@ class ChessAIDemo:
             else:
                 return absoluteValue
         else:  # white
-            if piece == 'P':
+            if piece.piece_type == chess.PAWN:
                 absoluteValue = 10 + pv.pawnEvalWhite[y][x]
-            elif piece == 'R':
+            elif piece.piece_type == chess.ROOK:
                 absoluteValue = 50 + pv.rookEvalWhite[y][x]
-            elif piece == 'N':
-                absoluteValue = 30 + pv.knightEval[y][x]
-            elif piece == 'B':
+            elif piece.piece_type == chess.KNIGHT:
+                absoluteValue = 40 + pv.knightEval[y][x]
+            elif piece.piece_type == chess.BISHOP:
                 absoluteValue = 30 + pv.bishopEvalWhite[y][x]
-            elif piece == 'Q':
+            elif piece.piece_type == chess.QUEEN:
                 absoluteValue = 90 + pv.queenEval[y][x]
-            elif piece == 'K':
+            elif piece.piece_type == chess.KING:
                 absoluteValue = 900 + pv.kingEvalWhite[y][x]
 
             if (self.color == 'w'):
@@ -98,7 +100,7 @@ class ChessAIDemo:
             return val
 
         if depth == 0 or self.board.is_game_over():
-            val=self.evaluateBoard(self.board.fen())
+            val = self.evaluateBoard()
             self.hashTable.InsertHashTable(depth, val, isMax, ht.HashExact)
             return val
 
@@ -124,9 +126,7 @@ class ChessAIDemo:
                                             alpha + 1))
                     if (value > alpha and value < beta):
                         eval_is_exact = True
-                        value = max(value,
-                                    self.expand(depth - 1,  not isMax,
-                                                alpha, beta))
+                        value = max(value, self.expand(depth - 1,  not isMax, alpha, beta))
                         bestMove = moveArr[index]
                 self.board.pop()
                 self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
@@ -158,6 +158,7 @@ class ChessAIDemo:
                     self.hashTable.InsertHashTable(depth, value, isMax, ht.HashBeta)
                     self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
                     return current
+
         self.historyHeuristics.InsertHistoryScore(bestMove, depth)
         if eval_is_exact:
             self.hashTable.InsertHashTable(depth, value, isMax, ht.HashExact)
