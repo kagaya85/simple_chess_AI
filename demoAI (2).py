@@ -1,13 +1,16 @@
 import chess
 import sys
-import pieceValue_zyr as pv
+import pieceValue as pv
 import traceback
 import hashTable as ht
 import historyHeuristics as hh
+import time
 import numpy as np
 
+file_value = open("C:\\Users\\youyaoyin\\OneDrive\\github-space\\chess_ai\\simple_chess_AI\\value.txt", 'w')
+
 class ChessAIDemo:
-    def __init__(self, depth = 3, color = 'w'):
+    def __init__(self, initdepth = 4, color = 'w'):
         """
         初始化搜索深度以及AI执棋颜色
         初始化置换表
@@ -16,11 +19,15 @@ class ChessAIDemo:
                 color: 执棋颜色(白先黑后)
         """
         self.color = color
-        self.searchDepth = int(depth)
+        self.initDepth = int(initdepth)
+        self.searchDepth = int(initdepth)
         self.board = chess.Board()
-        self.hashTable = ht.HashTable(1024*1024)
+        self.hashTable = ht.HashTable()
         self.hashTable.CalculateInitHashKey()
         self.historyHeuristics = hh.HistoryHeuristics()
+        self.startTime = 0
+        self.timeOver = True
+        self.timeLimit = 3
 
     def InitColor(self, color):
         if (color == "white"):
@@ -57,8 +64,7 @@ class ChessAIDemo:
         计算各个棋子的灵活性flexPos
         """
         for move in movArr:
-            m = move.uci()
-            flexPos[(ord(m[1]) - ord('1')) + 8 * (ord(m[0] )- ord('a'))]+= 1
+            flexPos[move.uci()[1] - 'a'][move.uci()[0] - '1']+= 1
         
         """
         计算各个棋子的受威胁情况threatedPos
@@ -74,11 +80,9 @@ class ChessAIDemo:
         """
         for pos in range(64):
             y = pos % 8
-            x = pos // 8
-            pa = self.board.piece_at
-            piece = self.board.piece_at(pos)
-            if(piece==None):
-                continue
+            x = pos / 8
+            #pa = self.board.piece_at
+            piece = pa(pos)
             #如果棋子为兵
             if(piece.symbol() == 'P'):
                 if(y == 0):
@@ -265,18 +269,18 @@ class ChessAIDemo:
         
         #遍历求估值，默认为执白棋
         for pos in range(64):
-            piece = pa(pos)
             if(piece != None):
                 sign = 0
+                piece = pa(pos)
                 if(piece.color == True):
                     sign = 1
                 else:
                     sign = -1
             
-                totalEval = totalEval + sign * (pv.baseValue[piece.piece_type-1] + pv.PosVal[piece.piece_type-1][pos] + flexPos[pos] * pv.flexValue[piece.piece_type-1]) 
+                totalEval = totalEval + sign * (pv.baseValue[piece.piece_type] + pv.PosVal[piece.piece_type][pos] + flexPos[pos] * pv.flexValue[piece.piece_type]) 
             
                 #如果该棋是白棋
-                halfBaseVal = pv.baseValue[piece.piece_type-1] / 8
+                halfBaseVal = pv.baseValue[piece.piece_type] / 8
                 if(sign == 1):
                     #轮到白棋走子
                     if(self.board.turn == True):
@@ -284,7 +288,7 @@ class ChessAIDemo:
                         if(threatedPos[pos] != 0):
                             #如果是王被威胁
                             if(piece.piece_type == 6):
-                                totalEval = totalEval - 8
+                                totalEval = totalEval - 30
                             else:
                                 totalEval = totalEval - halfBaseVal
                         #当前棋子被保护
@@ -322,7 +326,7 @@ class ChessAIDemo:
                         if(threatedPos[pos] != 0):
                             #如果是王被威胁
                             if(piece.piece_type == 6):
-                                totalEval = totalEval + 8
+                                totalEval = totalEval + 30
                             else:
                                 totalEval = totalEval + halfBaseVal
                         #当前棋子被保护
@@ -333,11 +337,11 @@ class ChessAIDemo:
             totalEval = -1 * totalEval
 
         return totalEval
-
     def evaluateBoard(self) -> float:
         """
         局面评估
-        color: 己方颜色
+        param:
+            color: 己方颜色
         """
         totalEval = 0.0
 
@@ -350,7 +354,7 @@ class ChessAIDemo:
         """
         根据棋子的类型以及位置返回评估值
         """
-
+        
         piece = self.board.piece_at(square)
         if piece == None:
             return 0
@@ -396,174 +400,189 @@ class ChessAIDemo:
             else:
                 return -absoluteValue
 
-    def expand(self, depth,isMax, alpha, beta):
+    def expand(self, depth, isMax, alpha, beta):
         """
-
         扩展节点，返回评估值
-
         """
-
         val = self.hashTable.SearchHashTable(depth, alpha, beta, isMax)
-
         if val != 114514:
-
+            file_value.write(str(depth)+" "+str(val)+" "+str(isMax)+"\n")
             return val
 
         moveArr = list()
-
         for move in self.board.legal_moves:
-
             moveArr.append(move)
 
-
-        if depth == 0: #or self.board.is_game_over():
-
-            val=self.evaluateBoard_zyr(moveArr,isMax)
-
+        if depth == 0 or self.board.is_game_over():
+            val = self.evaluateBoard_zyr(moveArr,isMax)
             self.hashTable.InsertHashTable(depth, val, isMax, ht.HashExact)
-
+            file_value.write(str(depth)+" "+str(val)+" "+str(isMax)+"\n")
             return val
-
-
-
-
+        #make NUll move
+       # if(depth>=2):
+        #     self.board.push(chess.Move.null())
+       #     val_null=self.expand(depth-2,not isMax,beta - 1, beta)
+        #    self.board.pop()
+        #    if(val_null>=beta):
+        #        return beta
+        #unmakenullmove
+        
         self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
 
-        bestMove = moveArr[0]
-
         eval_is_exact = False
-
+        bestMove = moveArr[0]
         if isMax:
-
-            current = -9999
-
             value = -9999
 
             for index, newMove in enumerate(moveArr):
-
                 self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
-
                 self.board.push(newMove)
 
                 if (index == 0):
-
-                    current = self.expand(depth - 1,not isMax, alpha,
-
-                                          beta)
-
+                    value = self.expand(depth - 1, not isMax, alpha, beta)
                 else:
-
-                    value = max(value,
-
-                                self.expand(depth - 1, not isMax, alpha,
-
-                                            alpha + 1))
-
+                    value = max(value, self.expand(depth - 1, not isMax, alpha, alpha + 1))
                     if (value > alpha and value < beta):
-
+                        value = max(value, self.expand(depth - 1,not isMax, alpha, beta))
                         eval_is_exact = True
-
-                        value = max(value,
-
-                                    self.expand(depth - 1,  not isMax,
-
-                                                alpha, beta))
-
                         bestMove = moveArr[index]
 
                 self.board.pop()
-
                 self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
-
-                current = max(current, value)
-
                 alpha = max(alpha, value)
 
                 if (alpha >= beta):
-
-                    self.hashTable.InsertHashTable(depth, current, isMax, ht.HashAlpha)
-
+                    self.hashTable.InsertHashTable(depth, value, isMax, ht.HashAlpha)
                     self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
-
-                    return current
-
-        else:
-
+                    file_value.write(str(depth)+" "+str(alpha)+" "+str(isMax)+"\n")
+                    return alpha   # alpha 剪枝
+        else:   # isMin
             value = 9999
 
-            current = 9999
-
-            for index, newMove in enumerate(self.board.legal_moves):
-
+            for index, newMove in enumerate(moveArr):
                 self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
-
                 self.board.push(newMove)
 
                 if (index == 0):
-
-                    current = self.expand(depth - 1, not isMax, alpha, beta)
-
+                    value = self.expand(depth - 1, not isMax, alpha, beta)
                 else:
-
-                    value = min(value,
-
-                                self.expand(depth - 1,not isMax, beta - 1, beta))
-
+                    value = min(value, self.expand(depth - 1, not isMax, beta - 1, beta))
                     if (value > alpha and value < beta):
-
-                        eval_is_exact = True
-
                         value = min(value, self.expand(depth - 1,not isMax, alpha, beta))
+                        eval_is_exact = True
+                        bestMove = moveArr[index]
 
                 self.board.pop()
-
                 self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
-
-                current = min(current, value)
-
                 beta = min(beta, value)
 
                 if (alpha >= beta):
-
                     self.hashTable.InsertHashTable(depth, value, isMax, ht.HashBeta)
-
                     self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
+                    file_value.write(str(depth)+" "+str(beta)+" "+str(isMax)+"\n")
+                    return beta   # beta 剪枝
 
-                    return current
+
+        self.historyHeuristics.InsertHistoryScore(bestMove, depth)
+        if eval_is_exact:
+            self.hashTable.InsertHashTable(depth, value, isMax, ht.HashExact)
+        file_value.write(str(depth)+" "+str(value)+" "+str(isMax)+"\n")
+        return value  # def end
+
+    def expandEx(self, depth, isMax, alpha, beta):
+        val = self.hashTable.SearchHashTable(depth, alpha, beta, isMax)
+        if val != 114514:
+            file_value.write(str(depth)+ str(alpha)+str(beta)+str(isMax)+str(val)+'\n')
+            return val
+
+        if int(time.time()) - self.startTime >= self.timeLimit:
+            self.timeOver = True
+            depth = 0
+        else:
+            self.timeOver = False
+
+        if depth == 0 or self.board.is_game_over():
+            val = self.evaluateBoard()
+            self.hashTable.InsertHashTable(depth, val, isMax, ht.HashExact)
+            return val
+        #make NUll move
+        # if(depth>=2):
+        #     self.board.push(chess.Move.null())
+        #     val_null=self.expand(depth-2,not isMax,beta - 1, beta)
+        #    self.board.pop()
+        #    if(val_null>=beta):
+        #        return beta
+        #unmakenullmove
+        """
+        change generator to list
+        """
+        moveArr = list()
+        for move in self.board.legal_moves:
+            moveArr.append(move)
+        
+        self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
+
+        eval_is_exact = False
+        bestMove = chess.Move.null()
+        a = alpha
+        b = beta
+        for index, newMove in enumerate(moveArr):
+            self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+            self.board.push(newMove)
+            t = -self.expandEx(depth-1, not isMax, -b, -a)
+            if t > a and t < beta and index > 0:
+                a = -self.expandEx(depth-1, not isMax, -beta, -t)
+                eval_is_exact = True
+                bestMove = newMove
+            self.board.pop()
+            self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+
+            if a < t:
+                eval_is_exact = True
+                a = t
+
+            if a >= beta:
+                self.hashTable.InsertHashTable(depth, a, isMax, ht.HashAlpha)
+                self.historyHeuristics.InsertHistoryScore(newMove, depth)
+                return a
+
+            b = a + 1    
 
         self.historyHeuristics.InsertHistoryScore(bestMove, depth)
 
         if eval_is_exact:
+            self.hashTable.InsertHashTable(depth, a, isMax, ht.HashExact)
+        else:
+            self.hashTable.InsertHashTable(depth, a, isMax, ht.HashBeta)
 
-            self.hashTable.InsertHashTable(depth, value, isMax, ht.HashExact)
-
-
-
-        return current
-
+        return a
 
     def getBestMove(self, isMax):
         """
-        用minmax遍历，返回最优移动uci
+        返回最优移动mov
         """
-
+        '''
+        if(self.timeOver == False):     # 上次最后一次搜索没有超时，则递归层数+1
+            self.searchDepth = self.searchDepth + 1
+        '''
         moveArr = list()
-
         for move in self.board.legal_moves:
             moveArr.append(move)
-
-        self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
+        
+        #self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
         bestValue = -9999
+        #bestMove = chess.Move.null()
         for newMove in moveArr:
+            self.startTime = int(time.time())
             self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
             self.board.push(newMove)
-            tempValue = self.expand(self.searchDepth - 1, not isMax, -10000, 10000)
+            tempValue = self.expand(self.searchDepth -1, not isMax, -10000, 10000)
             if bestValue < tempValue:
                 bestMove = newMove
                 bestValue = tempValue
             self.board.pop()
             self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
-
+        file_value.write("next\n")
         return bestMove
 
     def replace_tags_board(self, fenStr) -> list:
@@ -593,16 +612,11 @@ class ChessAIDemo:
                 self.board.push(AIMove)
                 print(AIout)
 
-            while True:
-                sys.stderr.write("当前搜索层数：{}层\n".format(self.searchDepth))
-                AnothersideInput = sys.stdin.readline()[:-1]
-                if AnothersideInput == 'exit':
-                    sys.exit('goodbye^_^\n')
-                else:
-                    opponentMove = self.board.parse_san(AnothersideInput)
-                    self.hashTable.MakeMove(self.board.piece_at(opponentMove.from_square), self.board.piece_at(opponentMove.to_square), opponentMove)
-                    self.board.push_san(AnothersideInput)
-                    break
+            sys.stderr.write("当前搜索层数：{}层\n".format(self.searchDepth))
+            AnothersideInput = sys.stdin.readline()[:-1]
+            opponentMove = self.board.parse_san(AnothersideInput)
+            self.hashTable.MakeMove(self.board.piece_at(opponentMove.from_square), self.board.piece_at(opponentMove.to_square), opponentMove)
+            self.board.push_san(AnothersideInput)
 
             if (self.color == 'b'):
                 AIMove = self.getBestMove(True)
@@ -619,18 +633,19 @@ class ChessAIDemo:
             if (self.color == 'w'):
                 AIMove = self.getBestMove(True)
                 self.board.push(AIMove)
-                print("AI:")
+                print("AI:当前搜索层数：{}层".format(self.searchDepth))
                 print(self.board)
 
             while True:
                 playerInput = input("\nplease input moves（eg.a1b2 exit退出）：")
                 if playerInput == 'exit':
                     sys.exit('goodbye^_^\n')
-                playerMove = chess.Move.from_uci(playerInput)
+                playerMove = self.board.parse_uci(playerInput)
                 if playerMove in self.board.legal_moves:
                     break
                 else:
                     print("input illegal")
+            self.hashTable.MakeMove(self.board.piece_at(playerMove.from_square), self.board.piece_at(playerMove.to_square), playerMove)
             self.board.push(playerMove)
 
             print("Player:")
@@ -648,14 +663,13 @@ class ChessAIDemo:
 """
 
 if __name__ == '__main__':
-
-   # try:
+    try:
         AIDEMO = ChessAIDemo()
         AIDEMO.GameStart()
-        #AIDEMO.ManualGame()
-    #except:
+        # AIDEMO.ManualGame()
 
-        #filename = "error.txt"
-        #file_object = open(filename, 'w')
-       # file_object.write(traceback.format_exc())
-       # file_object.close()
+    except:
+        filename = "C:\\Users\\youyaoyin\\OneDrive\\github-space\\chess_ai\\simple_chess_AI\\error.txt"
+        file_object = open(filename, 'w')
+        file_object.write(traceback.format_exc())
+        file_object.close()

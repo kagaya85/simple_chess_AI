@@ -1,10 +1,10 @@
 Traceback (most recent call last):
-  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAI.py", line 276, in <module>
+  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAIOLD.py", line 557, in <module>
     AIDEMO.GameStart()
-  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAI.py", line 213, in GameStart
+  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAIOLD.py", line 431, in GameStart
     AIMove = self.getBestMove(True)
-  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAI.py", line 182, in getBestMove
+  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAIOLD.py", line 369, in getBestMove
     tempValue = self.expand(self.searchDepth - 1, not isMax, -10000, 10000)
-  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAI.py", line 110, in expand
+  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAIOLD.py", line 225, in expand
     bestMove = moveArr[0]
 IndexError: list index out of range
