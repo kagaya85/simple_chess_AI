@@ -1,8 +1,10 @@
 Traceback (most recent call last):
-  File "c:\Users\kagaya\OneDrive\Artificial Intelligence\demo\demoAI.py", line 367, in <module>
+  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAI.py", line 276, in <module>
     AIDEMO.GameStart()
-  File "c:\Users\kagaya\OneDrive\Artificial Intelligence\demo\demoAI.py", line 316, in GameStart
-    opponentMove = self.board.parse_san(AnothersideInput)
-  File "C:\Users\kagaya\AppData\Local\Programs\Python\Python36\lib\site-packages\chess\__init__.py", line 2596, in parse_san
-    raise ValueError("illegal san: {0} in {1}".format(repr(san), self.fen()))
-ValueError: illegal san: 'h7' in rnbqkbnr/pppppppp/8/8/7P/8/PPPPPPP1/RNBQKBNR b KQkq - 0 1
+  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAI.py", line 213, in GameStart
+    AIMove = self.getBestMove(True)
+  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAI.py", line 182, in getBestMove
+    tempValue = self.expand(self.searchDepth - 1, not isMax, -10000, 10000)
+  File "C:\Users\youyaoyin\OneDrive\github-space\chess_ai\simple_chess_AI\demoAI.py", line 110, in expand
+    bestMove = moveArr[0]
+IndexError: list index out of range
