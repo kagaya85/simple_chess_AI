@@ -60,7 +60,7 @@ class ChessAIDemo:
         absoluteValue = 0
         if piece.color == False:  # black
             if piece.piece_type == chess.PAWN:
-                absoluteValue = 20 + pv.pawnEvalBlack[y][x]
+                absoluteValue = 15 + pv.pawnEvalBlack[y][x]
             elif piece.piece_type == chess.ROOK:
                 absoluteValue = 50 + pv.rookEvalBlack[y][x]
             elif piece.piece_type == chess.KNIGHT:
@@ -78,7 +78,7 @@ class ChessAIDemo:
                 return absoluteValue
         else:  # white
             if piece.piece_type == chess.PAWN:
-                absoluteValue = 20 + pv.pawnEvalWhite[y][x]
+                absoluteValue = 15 + pv.pawnEvalWhite[y][x]
             elif piece.piece_type == chess.ROOK:
                 absoluteValue = 50 + pv.rookEvalWhite[y][x]
             elif piece.piece_type == chess.KNIGHT:
@@ -242,6 +242,7 @@ class ChessAIDemo:
                self.searchDepth += 1
             elif(self.hashCheck > 50000):
                 self.searchDepth -= 1
+
         self.hashCheck = 0
         self.hashHit = 0
 
@@ -252,6 +253,7 @@ class ChessAIDemo:
         self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
         bestValue = -10000
         lastValue = -10000
+        count=0
         bestMove=chess.Move.null()
         for newMove in moveArr:
             self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
@@ -264,11 +266,13 @@ class ChessAIDemo:
                 bestValue=tempValue
                 lastValue=tempValue
                 bestMove=newMove
+                count=0
                 # lastmove=newMove
             elif bestValue!=-10000 and (bestValue==lastValue) and bestValue < tempValue :
                 lastValue=bestValue
                 bestValue=tempValue
                 # lastmove=bestMove
+                count=0
                 bestMove=newMove
             elif bestValue!=-10000 and (bestValue==lastValue) and bestValue > tempValue :
                 lastValue=tempValue
@@ -281,13 +285,20 @@ class ChessAIDemo:
             elif bestValue < tempValue and lastValue < tempValue:
                 lastValue=bestValue
                 bestValue=tempValue
+                count=0
                 # lastmove=bestMove
                 bestMove=newMove
+            elif bestValue == tempValue:
+                count+=1
             else:
                 pass
 
             self.board.pop()
             self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+
+        if(count>=4)and self.searchDepth==3:
+            self.searchDepth+=1
+            bestMove=self.getBestMove(isMax)
 
         if(bestMove==chess.Move.null()):
             self.hashTable.enable=False
@@ -314,13 +325,19 @@ class ChessAIDemo:
         sys.stderr.write("Link Start!\n")
         raw_color = sys.stdin.readline()[:-1]
         self.InitColor(raw_color)
-
+        count=0
         while True:
             if (self.color == 'w'):
+                #if(count!=0):
                 AIMove = self.getBestMove(True)
                 AIout = self.board.san(AIMove)
                 self.board.push(AIMove)
                 print(AIout)
+                #else:
+                   # newMove=self.board.parse_san('e4')
+                   # self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+                   # self.board.push(newMove)
+                   # print('e4')
 
             while True:
                 sys.stderr.write("当前搜索层数：{}层,哈希表搜索{}次，命中{}次\n".format(self.searchDepth, self.hashCheck, self.hashHit))
@@ -338,6 +355,9 @@ class ChessAIDemo:
                 AIout = self.board.san(AIMove)
                 self.board.push(AIMove)
                 print(AIout)
+            count+=1 
+            self.hashTable.enable=True
+
 
     def ManualGame(self):
         self.board = chess.Board()
