@@ -204,7 +204,7 @@ class ChessAIDemo:
 
     def GameStart(self):
         self.board = chess.Board()
-        sys.stderr.write("please input the chess color\n")
+        sys.stderr.write("Link Start!\n")
         raw_color = sys.stdin.readline()[:-1]
         self.InitColor(raw_color)
 
@@ -216,7 +216,7 @@ class ChessAIDemo:
                 print(AIout)
 
             while True:
-                sys.stderr.write("\nplease input moves（eg.a1b2 exit退出）：")
+                sys.stderr.write("当前搜索层数：{}层\n".format(self.searchDepth))
                 AnothersideInput = sys.stdin.readline()[:-1]
                 if AnothersideInput == 'exit':
                     sys.exit('goodbye^_^\n')

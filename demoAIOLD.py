@@ -88,31 +88,31 @@ class ChessAIDemo:
             else:
                 return -absoluteValue
 
-    def expand(self, depth, board, isMax, alpha, beta):
+    def expand(self, depth, isMax, alpha, beta):
         """
         扩展节点，返回评估值
         """
 
         if depth == 0:
-            return self.evaluateBoard(board.fen())
+            return self.evaluateBoard(self.board.fen())
 
         if isMax:
             current = -9999
             value = -9999
-            for index, newMove in enumerate(board.legal_moves):
-                board.push(newMove)
+            for index, newMove in enumerate(self.board.legal_moves):
+                self.board.push(newMove)
                 if (index == 0):
-                    current = self.expand(depth - 1, board, not isMax, alpha,
+                    current = self.expand(depth - 1, not isMax, alpha,
                                           beta)
                 else:
                     value = max(value,
-                                self.expand(depth - 1, board, not isMax, alpha,
+                                self.expand(depth - 1, not isMax, alpha,
                                             alpha + 1))
                     if (value > alpha and value < beta):
                         value = max(value,
-                                    self.expand(depth - 1, board, not isMax,
+                                    self.expand(depth - 1, not isMax,
                                                 alpha, beta))
-                board.pop()
+                self.board.pop()
                 current = max(current, value)
                 alpha = max(alpha, value)
                 if (alpha >= beta):
@@ -120,16 +120,16 @@ class ChessAIDemo:
         else:
             value = 9999
             current = 9999
-            for index, newMove in enumerate(board.legal_moves):
-                board.push(newMove)
+            for index, newMove in enumerate(self.board.legal_moves):
+                self.board.push(newMove)
                 if (index == 0):
-                    current = self.expand(depth - 1, board, not isMax, alpha, beta)
+                    current = self.expand(depth - 1, not isMax, alpha, beta)
                 else:
                     value = min(value,
-                                self.expand(depth - 1, board, not isMax, beta - 1, beta))
+                                self.expand(depth - 1, not isMax, beta - 1, beta))
                     if (value > alpha and value < beta):
-                        value = min(value, self.expand(depth - 1, board, not isMax, alpha, beta))
-                board.pop()
+                        value = min(value, self.expand(depth - 1, not isMax, alpha, beta))
+                self.board.pop()
                 current = min(current, value)
                 beta = min(beta, value)
                 if (alpha >= beta):
@@ -144,7 +144,7 @@ class ChessAIDemo:
         bestValue = -9999
         for newMove in self.board.legal_moves:
             self.board.push(newMove)
-            tempValue = self.expand(self.searchDepth - 1, self.board, not isMax, -10000, 10000)
+            tempValue = self.expand(self.searchDepth - 1, not isMax, -10000, 10000)
             if bestValue < tempValue:
                 bestMove = newMove
                 bestValue = tempValue
@@ -167,8 +167,7 @@ class ChessAIDemo:
         return fenStr.split(" ")[1] == 'w'
 
     def GameStart(self):
-        self.board = chess.Board()
-        sys.stderr.write("please input the chess color\n")
+        sys.stderr.write("Link Start!\n")
         raw_color = sys.stdin.readline()[:-1]
         self.InitColor(raw_color)
 
@@ -180,7 +179,7 @@ class ChessAIDemo:
                 print(AIout)
 
             while True:
-                sys.stderr.write("\nplease input moves（eg.a1b2 exit退出）：")
+                sys.stderr.write("当前搜索层数：{}层\n".format(self.searchDepth))
                 AnothersideInput = sys.stdin.readline()[:-1]
                 if AnothersideInput == 'exit':
                     sys.exit('goodbye^_^\n')
@@ -195,7 +194,6 @@ class ChessAIDemo:
                 print(AIout)
 
     def ManualGame(self):
-        self.board = chess.Board()
         sys.stderr.write("please input the chess color\n")
         raw_color = sys.stdin.readline()[:-1]
         self.InitColor(raw_color)
