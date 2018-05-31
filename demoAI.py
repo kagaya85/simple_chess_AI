@@ -7,7 +7,7 @@ import historyHeuristics as hh
 import numpy as np
 
 class ChessAIDemo:
-    def __init__(self, depth = 4, color = 'w'):
+    def __init__(self, depth = 5, color = 'w'):
         """
         初始化搜索深度以及AI执棋颜色
         初始化置换表
@@ -124,6 +124,8 @@ class ChessAIDemo:
             if(isMax):
                 return -9999
             else:
+                if(self.board.is_stalemate()):
+                    return -9999   # 避免僵局
                 return 9999
 
         self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
@@ -201,9 +203,9 @@ class ChessAIDemo:
         用minmax遍历，返回最优移动uci
         """
         if(self.hashCheck > 0):
-            if(self.hashCheck < 5000 and self.searchDepth < 6):
+            if(self.hashCheck < 10000 and self.searchDepth < 7):
                self.searchDepth += 1
-            elif(self.hashCheck > 60000):
+            elif(self.hashCheck > 100000):
                 self.searchDepth -= 1
 
         self.hashCheck = 0
@@ -297,7 +299,7 @@ class ChessAIDemo:
                 AIout = self.board.san(AIMove)
                 self.board.push(AIMove)
                 print(AIout)
-                sys.stderr.write("当前搜索{}层，评估局面{}种，哈希表搜索{}次，命中{}次\n".format(self.searchDepth, self.valueCheck, self.hashCheck, self.hashHit))
+                sys.stderr.write("当前搜索{}层，评估局面{}种，哈希表搜索{}次，命中{}次，命中率{:.2f}%\n".format(self.searchDepth, self.valueCheck, self.hashCheck, self.hashHit, (self.hashHit / self.hashCheck) * 100))
                 
                 #else:
                    # newMove=self.board.parse_san('e4')
@@ -320,7 +322,7 @@ class ChessAIDemo:
                 AIout = self.board.san(AIMove)
                 self.board.push(AIMove)
                 print(AIout)
-                sys.stderr.write("当前搜索{}层，评估局面{}种，哈希表搜索{}次，命中{}次\n".format(self.searchDepth, self.valueCheck, self.hashCheck, self.hashHit))
+                sys.stderr.write("当前搜索{}层，评估局面{}种，哈希表搜索{}次，命中{}次，命中率{:.2f}%\n".format(self.searchDepth, self.valueCheck, self.hashCheck, self.hashHit, (self.hashHit / self.hashCheck) * 100))
                 
 
             # count+=1 

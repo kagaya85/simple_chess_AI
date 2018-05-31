@@ -4,3 +4,11 @@ demoAIOLD.py
 demoAIOLD1.py
 error.txt
 pieceValue_zyr.py
+__pycache__/
+__pycache__/hashTable.cpython-36.pyc
+__pycache__/historyHeuristics.cpython-36.pyc
+__pycache__/pieceValue.cpython-36.pyc
+__pycache__/pieceValue_zyr.cpython-36.pyc
+__pycache__/hashTable.cpython-36.pyc
+__pycache__/historyHeuristics.cpython-36.pyc
+__pycache__/pieceValue.cpython-36.pyc
