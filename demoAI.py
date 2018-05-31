@@ -128,16 +128,21 @@ class ChessAIDemo:
             moveArr.append(move)
 
         if(len(moveArr) == 0):
+            '''
             if(self.board.is_stalemate()):
                 if(isMax):
                     return -1000
                 else:
                     return 1000
             else:
-                if(isMax):
+                '''
+
+            if(isMax):
+                return -9999
+            else:
+                if(self.board.is_stalemate()):
                     return -9999
-                else:
-                    return 9999
+                return 9999
 
         self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
 
@@ -280,7 +285,7 @@ class ChessAIDemo:
             self.hashTable.enable=False
             self.searchDepth+=1
             bestMove=self.getBestMove(isMax)
-
+        '''
         self.board.push(bestMove)
         if(self.board.is_stalemate() and self.enablestalement==True):
             self.enablestalement=False
@@ -290,7 +295,7 @@ class ChessAIDemo:
             self.searchDepth =4
         else:
             self.board.pop()
-
+        '''
         return bestMove
 
     def replace_tags_board(self, fenStr) -> list:
