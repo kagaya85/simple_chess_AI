@@ -14,7 +14,7 @@ import historyHeuristics as hh
 
 class ChessAIDemo:
 
-    def __init__(self, depth = 4, color = 'w'):
+    def __init__(self, depth = 3, color = 'w'):
 
         """
 
@@ -196,7 +196,7 @@ class ChessAIDemo:
 
 
 
-        if depth == 0: #or self.board.is_game_over():
+        if depth == 0 or self.board.is_game_over():
 
             val=self.evaluateBoard(self.board.fen())
 
@@ -216,12 +216,6 @@ class ChessAIDemo:
 
         self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
 
-        if len(moveArr)==0:
-            if isMax:
-                return -9999
-            else:
-                return 9999
-        
         bestMove = moveArr[0]
 
         eval_is_exact = False

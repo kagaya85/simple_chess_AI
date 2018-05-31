@@ -4,9 +4,10 @@ import pieceValue as pv
 import traceback
 import hashTable as ht
 import historyHeuristics as hh
+import numpy as np
 
 class ChessAIDemo:
-    def __init__(self, depth = 3, color = 'w'):
+    def __init__(self, depth = 4, color = 'w'):
         """
         初始化搜索深度以及AI执棋颜色
         初始化置换表
@@ -20,9 +21,9 @@ class ChessAIDemo:
         self.hashTable = ht.HashTable(1024*1024)
         self.hashTable.CalculateInitHashKey()
         self.historyHeuristics = hh.HistoryHeuristics()
-
         self.hashCheck = 0
         self.hashHit = 0
+        self.valueCheck = 0
 
     def InitColor(self, color):
         if (color == "white"):
@@ -31,6 +32,7 @@ class ChessAIDemo:
             self.color = 'b'
         else:
             self.color = 'w'
+
 
     def evaluateBoard(self) -> float:
         """
@@ -59,7 +61,7 @@ class ChessAIDemo:
         absoluteValue = 0
         if piece.color == False:  # black
             if piece.piece_type == chess.PAWN:
-                absoluteValue = 10 + pv.pawnEvalBlack[y][x]
+                absoluteValue = 15 + pv.pawnEvalBlack[y][x]
             elif piece.piece_type == chess.ROOK:
                 absoluteValue = 50 + pv.rookEvalBlack[y][x]
             elif piece.piece_type == chess.KNIGHT:
@@ -77,7 +79,7 @@ class ChessAIDemo:
                 return absoluteValue
         else:  # white
             if piece.piece_type == chess.PAWN:
-                absoluteValue = 10 + pv.pawnEvalWhite[y][x]
+                absoluteValue = 15 + pv.pawnEvalWhite[y][x]
             elif piece.piece_type == chess.ROOK:
                 absoluteValue = 50 + pv.rookEvalWhite[y][x]
             elif piece.piece_type == chess.KNIGHT:
@@ -96,8 +98,11 @@ class ChessAIDemo:
 
     def expand(self, depth,isMax, alpha, beta):
         """
+
         扩展节点，返回评估值
+
         """
+
         val = self.hashTable.SearchHashTable(depth, alpha, beta, isMax)
         self.hashCheck += 1
         
@@ -107,9 +112,11 @@ class ChessAIDemo:
 
         if depth == 0:
             val = self.evaluateBoard()
+            self.valueCheck += 1
             self.hashTable.InsertHashTable(depth, val, isMax, ht.HashExact)
             return val
         moveArr = list()
+
         for move in self.board.legal_moves:
             moveArr.append(move)
 
@@ -120,11 +127,14 @@ class ChessAIDemo:
                 return 9999
 
         self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
+
         bestMove = moveArr[0]
         eval_is_exact = False
+
         if isMax:
             current = -9999
             value = -9999
+
             for index, newMove in enumerate(moveArr):
                 self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
                 self.board.push(newMove)
@@ -133,15 +143,18 @@ class ChessAIDemo:
 
                 else:
                     value = max(value, self.expand(depth - 1, not isMax, alpha, alpha + 1))
-            
                     if (value > alpha and value < beta):
                         eval_is_exact = True
-                        value = max(value, self.expand(depth - 1,  not isMax, alpha, beta))
+                        value = max(value,
+                                    self.expand(depth - 1,  not isMax,
+                                                alpha, beta))
                         bestMove = moveArr[index]
                 self.board.pop()
                 self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+
                 current = max(current, value)
                 alpha = max(alpha, value)
+
                 if (alpha >= beta):
                     self.hashTable.InsertHashTable(depth, current, isMax, ht.HashAlpha)
                     self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
@@ -149,67 +162,113 @@ class ChessAIDemo:
         else:
             value = 9999
             current = 9999
+
             for index, newMove in enumerate(self.board.legal_moves):
                 self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
                 self.board.push(newMove)
+
                 if (index == 0):
                     current = self.expand(depth - 1, not isMax, alpha, beta)
                 else:
-                    value = min(value,
-                                self.expand(depth - 1,not isMax, beta - 1, beta))
+                    value = min(value, self.expand(depth - 1,not isMax, beta - 1, beta))
                     if (value > alpha and value < beta):
                         eval_is_exact = True
                         value = min(value, self.expand(depth - 1,not isMax, alpha, beta))
+
                 self.board.pop()
                 self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+
                 current = min(current, value)
                 beta = min(beta, value)
+
                 if (alpha >= beta):
                     self.hashTable.InsertHashTable(depth, value, isMax, ht.HashBeta)
                     self.historyHeuristics.InsertHistoryScore(moveArr[index], depth)
                     return current
 
         self.historyHeuristics.InsertHistoryScore(bestMove, depth)
+
         if eval_is_exact:
             self.hashTable.InsertHashTable(depth, value, isMax, ht.HashExact)
 
+
+
         return current
+
 
     def getBestMove(self, isMax):
         """
         用minmax遍历，返回最优移动uci
         """
         if(self.hashCheck > 0):
-            if(self.hashCheck < 5000):
-                self.searchDepth += 1
-            elif(self.hashCheck > 50000):
+            if(self.hashCheck < 5000 and self.searchDepth < 6):
+               self.searchDepth += 1
+            elif(self.hashCheck > 60000):
                 self.searchDepth -= 1
+
         self.hashCheck = 0
         self.hashHit = 0
-
+        self.valueCheck = 0
         moveArr = list()
-        moveList = list()
         for move in self.board.legal_moves:
             moveArr.append(move)
 
         self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
         bestValue = -10000
+        lastValue = -10000
+        count=0
+        bestMove=chess.Move.null()
         for newMove in moveArr:
             self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
             self.board.push(newMove)
             tempValue = self.expand(self.searchDepth - 1, not isMax, -10000, 10000)
-            if bestValue < tempValue:
-                moveList.append(newMove)
-                bestValue = tempValue
 
             if(self.board.can_claim_threefold_repetition()):
-                if(len(moveList) > 1):
-                    moveList.pop()  # 如果导致三步重复则放弃该走法
+                pass
+            elif bestValue < tempValue and (bestValue==-10000):
+                bestValue=tempValue
+                lastValue=tempValue
+                bestMove=newMove
+                count=0
+                # lastmove=newMove
+            elif bestValue!=-10000 and (bestValue==lastValue) and bestValue < tempValue :
+                lastValue=bestValue
+                bestValue=tempValue
+                # lastmove=bestMove
+                count=0
+                bestMove=newMove
+            elif bestValue!=-10000 and (bestValue==lastValue) and bestValue > tempValue :
+                lastValue=tempValue
+                # lastmove=newMove
+            elif bestValue > tempValue and lastValue > tempValue:
+                pass
+            elif bestValue > tempValue and lastValue < tempValue:
+                lastValue=tempValue
+                # lastmove=newMove
+            elif bestValue < tempValue and lastValue < tempValue:
+                lastValue=bestValue
+                bestValue=tempValue
+                count=0
+                # lastmove=bestMove
+                bestMove=newMove
+            elif bestValue == tempValue:
+                count+=1
+            else:
+                pass
 
             self.board.pop()
             self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
 
-        return moveList.pop()
+        if count >= 4 and self.searchDepth == 3:
+            self.searchDepth += 1
+            bestMove=self.getBestMove(isMax)
+
+        if bestMove == chess.Move.null():
+            self.hashTable.enable=False
+            self.searchDepth+=1
+            bestMove=self.getBestMove(isMax)
+        
+        return bestMove
 
     def replace_tags_board(self, fenStr) -> list:
         fenStr = fenStr.split(" ")[0]
@@ -230,16 +289,23 @@ class ChessAIDemo:
         sys.stderr.write("Link Start!\n")
         raw_color = sys.stdin.readline()[:-1]
         self.InitColor(raw_color)
-
+        # count=0
         while True:
             if (self.color == 'w'):
+                #if(count!=0):
                 AIMove = self.getBestMove(True)
                 AIout = self.board.san(AIMove)
                 self.board.push(AIMove)
                 print(AIout)
+                sys.stderr.write("当前搜索{}层，评估局面{}种，哈希表搜索{}次，命中{}次\n".format(self.searchDepth, self.valueCheck, self.hashCheck, self.hashHit))
+                
+                #else:
+                   # newMove=self.board.parse_san('e4')
+                   # self.hashTable.MakeMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
+                   # self.board.push(newMove)
+                   # print('e4')
 
             while True:
-                sys.stderr.write("当前搜索层数：{}层,哈希表搜索{}次，命中{}次\n".format(self.searchDepth, self.hashCheck, self.hashHit))
                 AnothersideInput = sys.stdin.readline()[:-1]
                 if AnothersideInput == 'exit':
                     sys.exit('goodbye^_^\n')
@@ -254,6 +320,12 @@ class ChessAIDemo:
                 AIout = self.board.san(AIMove)
                 self.board.push(AIMove)
                 print(AIout)
+                sys.stderr.write("当前搜索{}层，评估局面{}种，哈希表搜索{}次，命中{}次\n".format(self.searchDepth, self.valueCheck, self.hashCheck, self.hashHit))
+                
+
+            # count+=1 
+            self.hashTable.enable=True
+
 
     def ManualGame(self):
         self.board = chess.Board()
@@ -294,13 +366,13 @@ class ChessAIDemo:
 
 if __name__ == '__main__':
 
-    try:
+   # try:
         AIDEMO = ChessAIDemo()
         AIDEMO.GameStart()
         #AIDEMO.ManualGame()
-    except:
+    #except:
 
-        filename = "error.txt"
-        file_object = open(filename, 'w')
-        file_object.write(traceback.format_exc())
-        file_object.close()
+        #filename = "error.txt"
+        #file_object = open(filename, 'w')
+       # file_object.write(traceback.format_exc())
+       # file_object.close()
