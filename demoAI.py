@@ -54,7 +54,7 @@ class ChessAIDemo:
             return 0
         
         x = chess.square_file(square)
-        y = chess.square_rank(square)
+        y = 7 - chess.square_rank(square)
 
         absoluteValue = 0
         if piece.color == False:  # black
@@ -134,7 +134,6 @@ class ChessAIDemo:
                 else:
                     value = max(value, self.expand(depth - 1, not isMax, alpha, alpha + 1))
             
-            
                     if (value > alpha and value < beta):
                         eval_is_exact = True
                         value = max(value, self.expand(depth - 1,  not isMax, alpha, beta))
@@ -204,7 +203,8 @@ class ChessAIDemo:
                 bestValue = tempValue
 
             if(self.board.can_claim_threefold_repetition()):
-                moveList.pop()  # 如果导致三步重复则放弃该走法
+                if(len(moveList) > 1):
+                    moveList.pop()  # 如果导致三步重复则放弃该走法
 
             self.board.pop()
             self.hashTable.UndoMove(self.board.piece_at(newMove.from_square), self.board.piece_at(newMove.to_square), newMove)
