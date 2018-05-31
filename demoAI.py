@@ -7,7 +7,7 @@ import historyHeuristics as hh
 import numpy as np
 
 class ChessAIDemo:
-    def __init__(self, depth = 6, color = 'w'):
+    def __init__(self, depth = 4, color = 'w'):
         """
         初始化搜索深度以及AI执棋颜色
         初始化置换表
@@ -24,6 +24,7 @@ class ChessAIDemo:
         self.hashCheck = 0
         self.hashHit = 0
         self.valueCheck = 0
+        self.enablestalement=True
 
     def InitColor(self, color):
         if (color == "white"):
@@ -41,8 +42,8 @@ class ChessAIDemo:
         """
         totalEval = 0.0
 
-        for square in chess.SQUARES:
-            totalEval += self.getPieceValue(square)
+        for square in chess.SQUARES:   
+            totalEval+=self.getPieceValue(square)
 
         return totalEval
 
@@ -50,14 +51,12 @@ class ChessAIDemo:
         """
         根据棋子的类型以及位置返回评估值
         """
-
         piece = self.board.piece_at(square)
         if piece == None:
             return 0
         
         x = chess.square_file(square)
         y = 7 - chess.square_rank(square)
-
         absoluteValue = 0
         if piece.color == False:  # black
             if piece.piece_type == chess.PAWN:
@@ -75,8 +74,10 @@ class ChessAIDemo:
 
             if (self.color == 'w'):
                 return -absoluteValue
+                
             else:
-                return absoluteValue
+                return  absoluteValue
+        
         else:  # white
             if piece.piece_type == chess.PAWN:
                 absoluteValue = 15 + pv.pawnEvalWhite[y][x]
@@ -92,9 +93,14 @@ class ChessAIDemo:
                 absoluteValue = 1000 + pv.kingEvalWhite[y][x]
 
             if (self.color == 'w'):
-                return absoluteValue
+                return  absoluteValue
+              
             else:
-                return -absoluteValue
+                return  -absoluteValue
+        
+        return 0
+              
+
 
     def expand(self, depth,isMax, alpha, beta):
         """
@@ -122,10 +128,16 @@ class ChessAIDemo:
             moveArr.append(move)
 
         if(len(moveArr) == 0):
-            if(isMax):
-                return -9999
+            if(self.board.is_stalemate()):
+                if(isMax):
+                    return -1000
+                else:
+                    return 1000
             else:
-                return 9999
+                if(isMax):
+                    return -9999
+                else:
+                    return 9999
 
         self.historyHeuristics.moveSort(moveArr, moveArr.__len__, True)
 
@@ -268,7 +280,17 @@ class ChessAIDemo:
             self.hashTable.enable=False
             self.searchDepth+=1
             bestMove=self.getBestMove(isMax)
-        
+
+        self.board.push(bestMove)
+        if(self.board.is_stalemate() and self.enablestalement==True):
+            self.enablestalement=False
+            self.board.pop()
+            self.searchDepth =7
+            bestMove=self.getBestMove(isMax)
+            self.searchDepth =4
+        else:
+            self.board.pop()
+
         return bestMove
 
     def replace_tags_board(self, fenStr) -> list:
@@ -310,6 +332,10 @@ class ChessAIDemo:
                 AnothersideInput = sys.stdin.readline()[:-1]
                 if AnothersideInput == 'exit':
                     sys.exit('goodbye^_^\n')
+                elif AnothersideInput == '.':
+                    self.board.pop()
+                    self.searchDepth+=1
+                    break
                 else:
                     opponentMove = self.board.parse_san(AnothersideInput)
                     self.hashTable.MakeMove(self.board.piece_at(opponentMove.from_square), self.board.piece_at(opponentMove.to_square), opponentMove)
@@ -322,7 +348,7 @@ class ChessAIDemo:
                 self.board.push(AIMove)
                 print(AIout)
                 sys.stderr.write("当前搜索{}层，评估局面{}种，哈希表搜索{}次，命中{}次\n".format(self.searchDepth, self.valueCheck, self.hashCheck, self.hashHit))
-                
+            self.enablestalement==True
 
             # count+=1 
             self.hashTable.enable=True
@@ -367,13 +393,13 @@ class ChessAIDemo:
 
 if __name__ == '__main__':
 
-   # try:
+    try:
         AIDEMO = ChessAIDemo()
         AIDEMO.GameStart()
         #AIDEMO.ManualGame()
-    #except:
+    except:
 
-        #filename = "error.txt"
-        #file_object = open(filename, 'w')
-       # file_object.write(traceback.format_exc())
-       # file_object.close()
+        filename = "\\error.txt"
+        file_object = open(filename, 'w')
+        file_object.write(traceback.format_exc())
+        file_object.close()
