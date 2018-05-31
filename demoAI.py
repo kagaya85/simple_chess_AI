@@ -7,7 +7,7 @@ import historyHeuristics as hh
 import numpy as np
 
 class ChessAIDemo:
-    def __init__(self, depth = 4, color = 'w'):
+    def __init__(self, depth = 6, color = 'w'):
         """
         初始化搜索深度以及AI执棋颜色
         初始化置换表
@@ -113,8 +113,9 @@ class ChessAIDemo:
             val = self.evaluateBoard()
             self.hashTable.InsertHashTable(depth, val, isMax, ht.HashExact)
             return val
-        moveArr = list()
+        
 
+        moveArr = list()
         for move in self.board.legal_moves:
 
             moveArr.append(move)

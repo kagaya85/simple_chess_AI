@@ -4,3 +4,5 @@ demoAIOLD.py
 demoAIOLD1.py
 error.txt
 pieceValue_zyr.py
+__pycache__/hashTable.cpython-36.pyc
+.gitignore
