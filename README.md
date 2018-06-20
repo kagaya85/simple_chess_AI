@@ -1,6 +1,6 @@
 # simple_chess_AI
 
-`基于剪枝搜索的国际象棋AI`
+`基于剪枝搜索的国际象棋AI————master版本存在问题，稳定版本请查看分支stableVersion`
 
 ## 改进方向
 
